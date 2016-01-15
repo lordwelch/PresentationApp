@@ -4,9 +4,14 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/kardianos/osext"
 	"gopkg.in/qml.v1"
+)
+
+var (
+	path string
 )
 
 func main() {
@@ -19,13 +24,19 @@ func main() {
 func run() error {
 	engine := qml.NewEngine()
 	path, err := osext.ExecutableFolder()
-	controls, err := engine.LoadFile(path + "/../share/main.qml")
+	path = filepath.Clean(path + "/../src/github.com/lordwelch/PresentationApp/")
+	fmt.Println(path)
+	mainQml, err := engine.LoadFile(path + "/main.qml")
 	if err != nil {
 		return err
 	}
 
-	window := controls.CreateWindow(nil)
-	window.ObjectByName("data1")
+	cellQml, err := engine.LoadFile(path + "/cell.qml")
+	if err != nil {
+		return err
+	}
+
+	window := mainQml.CreateWindow(nil)
 
 	window.Show()
 	window.Wait()

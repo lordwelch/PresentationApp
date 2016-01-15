@@ -9,6 +9,8 @@ ApplicationWindow {
     minimumWidth: 500
     minimumHeight: 500
     property int globalForJs: 10
+    width: 1000
+    height: 600
     SplitView {
         id: mainSlider
         objectName: "mainSlider"
@@ -65,34 +67,34 @@ ApplicationWindow {
                         anchors.left: parent.left
                     }
                 }
+            }
 
-                Rectangle {
-                    id: col2
-                    objectName: "col2"
-                    color: "#4f90e2"
-                    border.width: 0
+            Rectangle {
+                id: col2
+                objectName: "col2"
+                color: "#4f90e2"
+                border.width: 0
 
-                    Column {
-                        id: data2
-                        objectName: "data2"
-                        anchors.fill: parent
-                    }
+                Column {
+                    id: data2
+                    objectName: "data2"
+                    anchors.fill: parent
                 }
             }
         }
+    }
 
-        Rectangle {
-            id: mainView
-            objectName: "mainView"
-            anchors.right: parent.right
-            anchors.rightMargin: 0
-            anchors.leftMargin: 0
-            anchors.left: gridRect.right
-            anchors.bottom: parent.bottom
-            anchors.top: parent.top
-            z: 1
-            clip: false
-            visible: true
-        }
+    Rectangle {
+        id: mainView
+        objectName: "mainView"
+        anchors.right: parent.right
+        anchors.rightMargin: 0
+        anchors.leftMargin: 0
+        anchors.left: gridRect.right
+        anchors.bottom: parent.bottom
+        anchors.top: parent.top
+        z: 1
+        clip: false
+        visible: true
     }
 }
