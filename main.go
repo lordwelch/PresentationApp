@@ -17,12 +17,13 @@ type cell struct {
 	qmlcell qml.Object
 	index   int
 }
+type slide []cell
 
 var (
 	path    string
 	cellQml qml.Object
 	window  *qml.Window
-	slides  []cell
+	slides  slide
 )
 
 func main() {
@@ -46,6 +47,8 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("ignore", cellQml)
+	qml.RunMain(slides.addCell())
 
 	window = mainQml.CreateWindow(nil)
 
@@ -54,14 +57,17 @@ func run() error {
 	return nil
 }
 
-func (cl *cell) addCell() {
-	cl.index = len(slides)
+func (sl *slide) addCell( /*cl *cell*/ ) {
+	var cl cell
+	cl.index = len(*sl)
+	fmt.Println("index: ", cl.index)
 	cl.qmlcell = cellQml.Create(nil)
+	fmt.Println("index: ", cl.index)
 	fmt.Println(cl.qmlcell.ObjectByName("celltext").Property("text"))
 	cl.text = "testing 1... 2... 3..."
 	fmt.Println(cl)
-	slides = append(slides, *cl)
-	slides[cl.index].qmlcell.Set("parent", window.ObjectByName("data1"))
+	//*sl = append(*sl, *cl)
+	//*sl[0] //.qmlcell.Set("parent", window.ObjectByName("data1"))
 
 }
 
