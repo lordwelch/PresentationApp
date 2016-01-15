@@ -1,7 +1,9 @@
 import QtQuick 2.0
 
 Rectangle {
-    property int index: 0
+    property int index: 0/*
+    anchors.right: parent
+    anchors.left: parent*/
 
     Text {
         id: cellText
@@ -24,4 +26,4 @@ Rectangle {
             anchors.fill: parent
         }
     }
-
+}
