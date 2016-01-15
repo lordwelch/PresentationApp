@@ -3,6 +3,7 @@ package main
 
 import (
 	"fmt"
+	//"image"
 	"os"
 	"path/filepath"
 
@@ -10,8 +11,18 @@ import (
 	"gopkg.in/qml.v1"
 )
 
+type cell struct {
+	text string
+	//img   image.Image
+	qmlcell qml.Object
+	index   int
+}
+
 var (
-	path string
+	path    string
+	cellQml qml.Object
+	window  *qml.Window
+	slides  []cell
 )
 
 func main() {
@@ -36,9 +47,24 @@ func run() error {
 		return err
 	}
 
-	window := mainQml.CreateWindow(nil)
+	window = mainQml.CreateWindow(nil)
 
 	window.Show()
 	window.Wait()
 	return nil
+}
+
+func (cl *cell) addCell() {
+	cl.index = len(slides)
+	cl.qmlcell = cellQml.Create(nil)
+	fmt.Println(cl.qmlcell.ObjectByName("celltext").Property("text"))
+	cl.text = "testing 1... 2... 3..."
+	fmt.Println(cl)
+	slides = append(slides, *cl)
+	slides[cl.index].qmlcell.Set("parent", window.ObjectByName("data1"))
+
+}
+
+func (cl *cell) String() string {
+	return fmt.Sprint("Index: %T \nText:  %T", cl.index, cl.text)
 }

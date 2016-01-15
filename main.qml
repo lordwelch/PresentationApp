@@ -65,6 +65,8 @@ ApplicationWindow {
                         anchors.bottom: parent.bottom
                         anchors.top: parent.top
                         anchors.left: parent.left
+                        //onAdded: children.width = data1.width
+
                     }
                 }
 

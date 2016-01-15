@@ -1,12 +1,18 @@
 import QtQuick 2.0
 
 Rectangle {
-    property int index: 0/*
-    anchors.right: parent
+    enabled: true
+    objectName: "cellRect"
+    property int index: 0
+    width: 100
+    height: 100
+    /*anchors.right: parent
     anchors.left: parent*/
 
     Text {
         id: cellText
+        enabled: true
+        objectName: "celltext"
         height: 75
         text: "hello this is text\nhaha\nhdsjfklfhaskjd"
         textFormat: Text.AutoText
@@ -21,8 +27,11 @@ Rectangle {
         anchors.left: parent.left
         anchors.leftMargin: 0
         font.pixelSize: 12
+
         MouseArea {
             id: cellMouse
+            enabled: true
+            objectName: "cellMouse"
             anchors.fill: parent
         }
     }
