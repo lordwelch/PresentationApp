@@ -24,6 +24,7 @@ var (
 	cellQml qml.Object
 	window  *qml.Window
 	slides  slide
+	err     error
 )
 
 func main() {
@@ -35,7 +36,7 @@ func main() {
 
 func run() error {
 	engine := qml.NewEngine()
-	path, err := osext.ExecutableFolder()
+	path, err = osext.ExecutableFolder()
 	path = filepath.Clean(path + "/../src/github.com/lordwelch/PresentationApp/")
 	fmt.Println(path)
 	mainQml, err := engine.LoadFile(path + "/main.qml")
@@ -43,34 +44,59 @@ func run() error {
 		return err
 	}
 
-	cellQml, err := engine.LoadFile(path + "/cell.qml")
+	cellQml, err = engine.LoadFile(path + "/cell.qml")
 	if err != nil {
 		return err
 	}
-	fmt.Println("ignore", cellQml)
-	qml.RunMain(slides.addCell())
 
 	window = mainQml.CreateWindow(nil)
+	slides.addCell()
 
 	window.Show()
 	window.Wait()
 	return nil
 }
 
-func (sl *slide) addCell( /*cl *cell*/ ) {
-	var cl cell
-	cl.index = len(*sl)
-	fmt.Println("index: ", cl.index)
-	cl.qmlcell = cellQml.Create(nil)
-	fmt.Println("index: ", cl.index)
-	fmt.Println(cl.qmlcell.ObjectByName("celltext").Property("text"))
-	cl.text = "testing 1... 2... 3..."
-	fmt.Println(cl)
-	//*sl = append(*sl, *cl)
-	//*sl[0] //.qmlcell.Set("parent", window.ObjectByName("data1"))
-
+func (cl *cell) setSignals() {
+	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {
+		cellText := cl.qmlcell.ObjectByName("cellText")
+		textEdit := window.ObjectByName("textEdit")
+		textEdit.Set("x", cellText.Int("x")+4)
+		textEdit.Set("y", cellText.Int("y")+4)
+		textEdit.Set("width", cellText.Int("width"))
+		textEdit.Set("height", cellText.Int("height"))
+		textEdit.Set("opacity", 100)
+		textEdit.Set("visible", true)
+		textEdit.Set("focus", true)
+		textEdit.Set("enabled", true) /*
+			fmt.Println(textEdit.Int("x"))
+			fmt.Println(textEdit.Int("y"))
+			fmt.Println(textEdit.Int("width"))
+			fmt.Println(textEdit.Int("height"))*/
+	})
 }
 
-func (cl *cell) String() string {
-	return fmt.Sprint("Index: %T \nText:  %T", cl.index, cl.text)
+func (sl *slide) addCell( /*cl *cell*/ ) {
+	var cl cell
+
+	cl.qmlcell = cellQml.Create(nil)
+	cl.qmlcell.Set("objectName", fmt.Sprintf("cellRect&d", cl.index))
+	cl.qmlcell.Set("parent", window.ObjectByName("data1"))
+
+	cl.index = len(*sl)
+	cl.text = "testing 1... 2... 3..."
+	cl.qmlcell.ObjectByName("cellText").Set("text", cl.text)
+	*sl = append(*sl, cl)
+
+	cl.setSignals()
+
+	fmt.Print((*sl)[len(*sl)-1])
+}
+
+func (cl cell) String() string {
+	return fmt.Sprintf("Index: %T \nText:  %T\n", cl.index, cl.text)
+}
+
+func (cl cell) GoString() string {
+	return cl.String()
 }

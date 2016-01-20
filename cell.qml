@@ -6,13 +6,14 @@ Rectangle {
     property int index: 0
     width: 100
     height: 100
-    /*anchors.right: parent
-    anchors.left: parent*/
+    color: "#00000000"
+    anchors.right: parent.right
+    anchors.left: parent.left
 
     Text {
         id: cellText
         enabled: true
-        objectName: "celltext"
+        objectName: "cellText"
         height: 75
         text: "hello this is text\nhaha\nhdsjfklfhaskjd"
         textFormat: Text.AutoText

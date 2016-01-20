@@ -8,9 +8,40 @@ ApplicationWindow {
     objectName: "applicationWindow1"
     minimumWidth: 500
     minimumHeight: 500
-    property int globalForJs: 10
     width: 1000
     height: 600
+
+    menuBar: MenuBar {
+        Menu {
+            title: "&File"
+            MenuItem {
+
+            }
+            MenuItem {
+                text: "Close"
+                shortcut: StandardKey.Quit
+            }
+        }
+        Menu {
+            title: "&Edit"
+            MenuItem {
+                //action: cutAction
+            }
+            MenuItem {
+                //action: copyAction
+            }
+            MenuItem {
+                //action: pasteAction
+            }
+        }
+        Menu {
+            title: "&Help"
+            MenuItem {
+                //action: aboutAction
+            }
+        }
+    }
+
     SplitView {
         id: mainSlider
         objectName: "mainSlider"
@@ -66,7 +97,6 @@ ApplicationWindow {
                         anchors.top: parent.top
                         anchors.left: parent.left
                         //onAdded: children.width = data1.width
-
                     }
                 }
 
@@ -97,6 +127,37 @@ ApplicationWindow {
             z: 1
             clip: false
             visible: true
+        }
+    }
+
+    Rectangle {
+        id: textEdit
+        x: 448
+        y: 151
+        objectName: "textEdit"
+        width: 200
+        height: 200
+        color: "#ffffff"
+        visible: false
+        Keys.onEscapePressed: {
+            x = -100
+            y = -100
+            visible = false
+            focus = false
+            enabled = false
+            opacity = 0
+        }
+
+        TextArea {
+            id: textEdit1
+            objectName: "textEdit1"
+            text: qsTr("Text Edit")
+            anchors.fill: parent
+            clip: true
+            textFormat: Text.AutoText
+            visible: true
+            font.pixelSize: 12
+            z: 99
         }
     }
 }
