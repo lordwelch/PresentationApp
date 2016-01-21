@@ -1,7 +1,6 @@
-import QtQuick 2.5
+import QtQuick 2.4
 import QtQuick.Controls 1.3
-import QtQuick.Dialogs 1.1
-import QtQuick.Layouts 1.0
+import QtQuick.Window 2.0
 import "qml"
 
 ApplicationWindow {
@@ -13,6 +12,7 @@ ApplicationWindow {
     minimumHeight: 500
     width: 1000
     height: 600
+    Screen.objectName: "Screen1"
     AboutDialog { id: aboutDialog }
 
     Action {
@@ -25,7 +25,6 @@ ApplicationWindow {
         Menu {
             title: "&File"
             MenuItem {
-
             }
             MenuItem {
                 text: "Close"
