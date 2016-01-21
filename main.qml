@@ -1,5 +1,8 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.3
+import QtQuick.Dialogs 1.1
+import QtQuick.Layouts 1.0
+import "qml"
 
 ApplicationWindow {
     id: applicationWindow1
@@ -10,6 +13,13 @@ ApplicationWindow {
     minimumHeight: 500
     width: 1000
     height: 600
+    AboutDialog { id: aboutDialog }
+
+    Action {
+        id: aboutAction
+        text: "About"
+        onTriggered: aboutDialog.open()
+    }
 
     menuBar: MenuBar {
         Menu {
@@ -23,21 +33,9 @@ ApplicationWindow {
             }
         }
         Menu {
-            title: "&Edit"
-            MenuItem {
-                //action: cutAction
-            }
-            MenuItem {
-                //action: copyAction
-            }
-            MenuItem {
-                //action: pasteAction
-            }
-        }
-        Menu {
             title: "&Help"
             MenuItem {
-                //action: aboutAction
+                action: aboutAction
             }
         }
     }
@@ -132,6 +130,7 @@ ApplicationWindow {
 
     Rectangle {
         id: textEdit
+        property int cell
         x: 448
         y: 151
         objectName: "textEdit"
@@ -143,15 +142,16 @@ ApplicationWindow {
             x = -100
             y = -100
             visible = false
-            focus = false
+            focus = true
             enabled = false
             opacity = 0
+            textEdit1.focus = false
         }
 
         TextArea {
             id: textEdit1
             objectName: "textEdit1"
-            text: qsTr("Text Edit")
+            text: "Text Edit"
             anchors.fill: parent
             clip: true
             textFormat: Text.AutoText

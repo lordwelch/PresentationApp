@@ -20,11 +20,12 @@ type cell struct {
 type slide []cell
 
 var (
-	path    string
-	cellQml qml.Object
-	window  *qml.Window
-	slides  slide
-	err     error
+	path     string
+	textEdit qml.Object
+	cellQml  qml.Object
+	window   *qml.Window
+	slides   slide
+	err      error
 )
 
 func main() {
@@ -44,12 +45,13 @@ func run() error {
 		return err
 	}
 
-	cellQml, err = engine.LoadFile(path + "/cell.qml")
+	cellQml, err = engine.LoadFile(path + "/qml/cell.qml")
 	if err != nil {
 		return err
 	}
 
 	window = mainQml.CreateWindow(nil)
+	textEdit = window.ObjectByName("textEdit")
 	slides.addCell()
 
 	window.Show()
@@ -60,19 +62,31 @@ func run() error {
 func (cl *cell) setSignals() {
 	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {
 		cellText := cl.qmlcell.ObjectByName("cellText")
-		textEdit := window.ObjectByName("textEdit")
+		textEdit.Set("cell", cl.index)
 		textEdit.Set("x", cellText.Int("x")+4)
 		textEdit.Set("y", cellText.Int("y")+4)
 		textEdit.Set("width", cellText.Int("width"))
 		textEdit.Set("height", cellText.Int("height"))
 		textEdit.Set("opacity", 100)
 		textEdit.Set("visible", true)
-		textEdit.Set("focus", true)
+		textEdit.ObjectByName("textEdit1").Set("focus", true)
 		textEdit.Set("enabled", true) /*
 			fmt.Println(textEdit.Int("x"))
 			fmt.Println(textEdit.Int("y"))
 			fmt.Println(textEdit.Int("width"))
 			fmt.Println(textEdit.Int("height"))*/
+	})
+	textEdit.ObjectByName("textEdit1").On("focusChanged", func(focus bool) {
+		var (
+			str string
+			cel cell
+		)
+		fmt.Printf("focusChanged: focus: %t\n", focus)
+		if !focus {
+			str = textEdit.ObjectByName("textEdit1").String("text")
+			cel = slides[textEdit.Int("cell")]
+			cel.qmlcell.ObjectByName("cellText").Set("text", str)
+		}
 	})
 }
 
@@ -80,7 +94,7 @@ func (sl *slide) addCell( /*cl *cell*/ ) {
 	var cl cell
 
 	cl.qmlcell = cellQml.Create(nil)
-	cl.qmlcell.Set("objectName", fmt.Sprintf("cellRect&d", cl.index))
+	cl.qmlcell.Set("objectName", fmt.Sprintf("cellRect%d", cl.index))
 	cl.qmlcell.Set("parent", window.ObjectByName("data1"))
 
 	cl.index = len(*sl)
