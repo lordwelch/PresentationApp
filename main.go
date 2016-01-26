@@ -11,7 +11,7 @@ import (
 
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/kardianos/osext"
-	"gopkg.in/qml.v1"
+	"github.com/lordwelch/qml"
 )
 
 type cell struct {
@@ -27,16 +27,13 @@ var (
 	textEdit qml.Object
 	cellQml  qml.Object
 	window   *qml.Window
+	win      *glfw.Window
 	slides   slide
 	err      error
 	monitors []*glfw.Monitor
 )
 
 func main() {
-	if err := glfw.Init(); err != nil {
-		log.Fatalln("failed to initialize glfw:", err)
-	}
-	checkMon()
 
 	if err := qml.Run(run); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -52,14 +49,55 @@ func init() {
 }
 
 func run() error {
+	
 	engine := qml.NewEngine()
 	path, err = osext.ExecutableFolder()
 	path = filepath.Clean(path + "/../src/github.com/lordwelch/PresentationApp/")
 	//fmt.Println(path)
+qml.RunMain(func() {
+		if err = glfw.Init(); err != nil {
+			log.Fatalln("failed to initialize glfw:", err)
+		}
+		checkMon()
+
+		win, err = glfw.CreateWindow(800, 600, "Cube", nil, nil)
+		if err != nil {
+			panic(err)
+		}
+
+		win.MakeContextCurrent()
+		
+		fmt.Printf("qml loop: %d\n", qml.Ilyuh)
+		qml.Ilyuh++
+		if !win.ShouldClose() {
+			win.SwapBuffers()
+			glfw.PollEvents()
+		}
+	})
+
+	qml.RunMain(func() {
+		fmt.Println("win: ", win.ShouldClose())
+		fmt.Printf("qml loop: %d\n", qml.Ilyuh)
+		qml.Ilyuh++
+		if !win.ShouldClose() {
+			win.SwapBuffers()
+			glfw.PollEvents()
+		}
+	})
+
 	mainQml, err := engine.LoadFile(path + "/main.qml")
 	if err != nil {
 		return err
 	}
+
+	qml.RunMain(func() {
+		fmt.Printf("qml loop: %d\n", qml.Ilyuh)
+		qml.Ilyuh++
+		if !win.ShouldClose() {
+			win.SwapBuffers()
+			glfw.PollEvents()
+		}
+	})
 
 	/*projQml, err := engine.LoadFile(path + "/qml/projection.qml")
 	if err != nil {
@@ -75,6 +113,24 @@ func run() error {
 	//created(projQml)
 	textEdit = window.ObjectByName("textEdit")
 	slides.addCell()
+
+	qml.RunMain(func() {
+		fmt.Printf("qml loop: %d\n", qml.Ilyuh)
+		qml.Ilyuh++
+		if !win.ShouldClose() {
+			win.SwapBuffers()
+			glfw.PollEvents()
+		}
+	})
+	qml.Ilyuh = 0
+	qml.Func1 = func() {
+		fmt.Printf("qml loop: %d\n", qml.Ilyuh)
+		qml.Ilyuh++
+		if !win.ShouldClose() {
+			win.SwapBuffers()
+			glfw.PollEvents()
+		}
+	}
 
 	window.Show()
 	window.Wait()
