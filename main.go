@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/kardianos/osext"
 	"github.com/lordwelch/qml"
@@ -41,6 +42,7 @@ func main() {
 	}
 
 	glfw.Terminate()
+
 }
 
 func init() {
@@ -49,60 +51,32 @@ func init() {
 }
 
 func run() error {
-	
+
 	engine := qml.NewEngine()
 	path, err = osext.ExecutableFolder()
 	path = filepath.Clean(path + "/../src/github.com/lordwelch/PresentationApp/")
-	//fmt.Println(path)
-qml.RunMain(func() {
-		if err = glfw.Init(); err != nil {
-			log.Fatalln("failed to initialize glfw:", err)
-		}
-		checkMon()
 
-		win, err = glfw.CreateWindow(800, 600, "Cube", nil, nil)
-		if err != nil {
-			panic(err)
-		}
+	if err = glfw.Init(); err != nil {
+		log.Fatalln("failed to initialize glfw:", err)
+	}
+	checkMon()
+	glfw.WindowHint(glfw.ContextVersionMajor, 2)
+	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 
-		win.MakeContextCurrent()
-		
-		fmt.Printf("qml loop: %d\n", qml.Ilyuh)
-		qml.Ilyuh++
-		if !win.ShouldClose() {
-			win.SwapBuffers()
-			glfw.PollEvents()
-		}
-	})
+	win, err = glfw.CreateWindow(800, 600, "Cube", nil, nil)
+	if err != nil {
+		panic(err)
+	}
+	if err := gl.Init(); err != nil {
+		panic(err)
+	}
 
-	qml.RunMain(func() {
-		fmt.Println("win: ", win.ShouldClose())
-		fmt.Printf("qml loop: %d\n", qml.Ilyuh)
-		qml.Ilyuh++
-		if !win.ShouldClose() {
-			win.SwapBuffers()
-			glfw.PollEvents()
-		}
-	})
+	win.MakeContextCurrent()
 
 	mainQml, err := engine.LoadFile(path + "/main.qml")
 	if err != nil {
 		return err
 	}
-
-	qml.RunMain(func() {
-		fmt.Printf("qml loop: %d\n", qml.Ilyuh)
-		qml.Ilyuh++
-		if !win.ShouldClose() {
-			win.SwapBuffers()
-			glfw.PollEvents()
-		}
-	})
-
-	/*projQml, err := engine.LoadFile(path + "/qml/projection.qml")
-	if err != nil {
-		return err
-	}*/
 
 	cellQml, err = engine.LoadFile(path + "/qml/cell.qml")
 	if err != nil {
@@ -110,23 +84,14 @@ qml.RunMain(func() {
 	}
 
 	window = mainQml.CreateWindow(nil)
-	//created(projQml)
+
 	textEdit = window.ObjectByName("textEdit")
 	slides.addCell()
 
-	qml.RunMain(func() {
-		fmt.Printf("qml loop: %d\n", qml.Ilyuh)
-		qml.Ilyuh++
-		if !win.ShouldClose() {
-			win.SwapBuffers()
-			glfw.PollEvents()
-		}
-	})
-	qml.Ilyuh = 0
+	gl.ClearColor(0.1, 0.5, 0.9, 0.0)
 	qml.Func1 = func() {
-		fmt.Printf("qml loop: %d\n", qml.Ilyuh)
-		qml.Ilyuh++
 		if !win.ShouldClose() {
+			gl.Clear(gl.COLOR_BUFFER_BIT)
 			win.SwapBuffers()
 			glfw.PollEvents()
 		}
