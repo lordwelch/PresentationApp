@@ -1,13 +1,14 @@
 // PresentationApp project main.go
 package main
 
+import "C"
+
 import (
 	"fmt"
 	//"image"
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
@@ -24,31 +25,32 @@ type cell struct {
 type slide []cell
 
 var (
-	path     string
-	textEdit qml.Object
-	cellQml  qml.Object
-	window   *qml.Window
-	win      *glfw.Window
-	slides   slide
-	err      error
-	monitors []*glfw.Monitor
+	path      string
+	textEdit  qml.Object
+	cellQml   qml.Object
+	window    *qml.Window
+	win       *glfw.Window
+	slides    slide
+	err       error
+	monitors  []*glfw.Monitor
+	drawSlide func()
 )
 
 func main() {
 
-	if err := qml.Run(run); err != nil {
+	if err = qml.Run(run); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
 
-	glfw.Terminate()
+	defer glfw.Terminate()
 
 }
 
-func init() {
+/*func init() {
 	// GLFW event handling must run on the main OS thread
-	runtime.LockOSThread()
-}
+	//runtime.LockOSThread()
+}*/
 
 func run() error {
 
@@ -56,24 +58,7 @@ func run() error {
 	path, err = osext.ExecutableFolder()
 	path = filepath.Clean(path + "/../src/github.com/lordwelch/PresentationApp/")
 
-	if err = glfw.Init(); err != nil {
-		log.Fatalln("failed to initialize glfw:", err)
-	}
-	checkMon()
-	glfw.WindowHint(glfw.ContextVersionMajor, 2)
-	glfw.WindowHint(glfw.ContextVersionMinor, 1)
-
-	win, err = glfw.CreateWindow(800, 600, "Cube", nil, nil)
-	if err != nil {
-		panic(err)
-	}
-	if err := gl.Init(); err != nil {
-		panic(err)
-	}
-
-	win.MakeContextCurrent()
-
-	mainQml, err := engine.LoadFile(path + "/main.qml")
+	mainQml, err = engine.LoadFile(path + "/main.qml")
 	if err != nil {
 		return err
 	}
@@ -87,17 +72,13 @@ func run() error {
 
 	textEdit = window.ObjectByName("textEdit")
 	slides.addCell()
-
-	gl.ClearColor(0.1, 0.5, 0.9, 0.0)
-	qml.Func1 = func() {
-		if !win.ShouldClose() {
-			gl.Clear(gl.COLOR_BUFFER_BIT)
-			win.SwapBuffers()
-			glfw.PollEvents()
-		}
-	}
+	setSignals()
 
 	window.Show()
+	qml.RunMain(func() {
+		glInit()
+	})
+
 	window.Wait()
 	return nil
 }
@@ -110,6 +91,7 @@ func checkMon() {
 		fmt.Printf("You have %d monitors\n", i)
 	}
 	monitorInfo()
+
 }
 
 func monitorInfo() {
@@ -117,11 +99,63 @@ func monitorInfo() {
 		fmt.Printf("monitor name: %s\n", mon.GetName())
 		i, t := mon.GetPos()
 		fmt.Printf("position X: %d  Y: %d\n", i, t)
-		//fmt.Println(mon.)
 	}
+
 }
 
-func (cl *cell) setSignals() {
+func glInit() {
+	if err = glfw.Init(); err != nil {
+		log.Fatalln("failed to initialize glfw:", err)
+	}
+	checkMon()
+	glfw.WindowHint(glfw.ContextVersionMajor, 2)
+	glfw.WindowHint(glfw.ContextVersionMinor, 1)
+
+	win, err = glfw.CreateWindow(800, 600, "Cube", nil, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	win.MakeContextCurrent()
+
+	if err := gl.Init(); err != nil {
+		panic(err)
+	}
+
+	gl.ClearColor(0.1, 0.5, 0.9, 0.0)
+	qml.Func1 = func() int {
+		if !win.ShouldClose() {
+			gl.Clear(gl.COLOR_BUFFER_BIT)
+			drawSlide()
+			win.SwapBuffers()
+			glfw.PollEvents()
+			return 0
+		} else {
+			win.Hide()
+
+			return 1
+		}
+	}
+
+}
+
+func setSignals() {
+	textEdit.ObjectByName("textEdit1").On("focusChanged", func(focus bool) {
+		var (
+			tr  string
+			cel cell
+		)
+
+		if !focus {
+			str = textEdit.ObjectByName("textEdit1").String("text")
+			cel = slides[textEdit.Int("cell")]
+			cel.qmlcell.ObjectByName("cellText").Set("text", str)
+		}
+	})
+
+}
+
+func (cl *cell) setSignal() {
 	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {
 		cellText := cl.qmlcell.ObjectByName("cellText")
 		textEdit.Set("cell", cl.index)
@@ -132,24 +166,9 @@ func (cl *cell) setSignals() {
 		textEdit.Set("opacity", 100)
 		textEdit.Set("visible", true)
 		textEdit.ObjectByName("textEdit1").Set("focus", true)
-		textEdit.Set("enabled", true) /*
-			fmt.Println(textEdit.Int("x"))
-			fmt.Println(textEdit.Int("y"))
-			fmt.Println(textEdit.Int("width"))
-			fmt.Println(textEdit.Int("height"))*/
+		textEdit.Set("enabled", true)
 	})
-	textEdit.ObjectByName("textEdit1").On("focusChanged", func(focus bool) {
-		var (
-			str string
-			cel cell
-		)
-		//fmt.Printf("focusChanged: focus: %t\n", focus)
-		if !focus {
-			str = textEdit.ObjectByName("textEdit1").String("text")
-			cel = slides[textEdit.Int("cell")]
-			cel.qmlcell.ObjectByName("cellText").Set("text", str)
-		}
-	})
+
 }
 
 func (sl *slide) addCell( /*cl *cell*/ ) {
@@ -165,15 +184,10 @@ func (sl *slide) addCell( /*cl *cell*/ ) {
 	cl.qmlcell.ObjectByName("cellText").Set("text", cl.text)
 	*sl = append(*sl, cl)
 
-	cl.setSignals()
+	cl.setSignal()
 
-	//fmt.Print((*sl)[cl.index])
 }
 
 func (cl cell) String() string {
 	return fmt.Sprintf("Index: %d \nText:  %s\n", cl.index, cl.text)
-}
-
-func (cl cell) GoString() string {
-	return cl.String()
 }
