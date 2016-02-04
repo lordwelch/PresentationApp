@@ -53,6 +53,7 @@ func main() {
 }*/
 
 func run() error {
+	var mainQml qml.Object
 
 	engine := qml.NewEngine()
 	path, err = osext.ExecutableFolder()
@@ -142,7 +143,7 @@ func glInit() {
 func setSignals() {
 	textEdit.ObjectByName("textEdit1").On("focusChanged", func(focus bool) {
 		var (
-			tr  string
+			str string
 			cel cell
 		)
 
