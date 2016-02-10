@@ -5,13 +5,14 @@ import "C"
 
 import (
 	"fmt"
-	//"image"
+	"image"
 	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
+	"github.com/gographics/imagick/imagick"
 	"github.com/kardianos/osext"
 	"github.com/lordwelch/qml"
 )
@@ -25,15 +26,18 @@ type cell struct {
 type slide []cell
 
 var (
-	path      string
-	textEdit  qml.Object
-	cellQml   qml.Object
-	window    *qml.Window
-	win       *glfw.Window
-	slides    slide
-	err       error
-	monitors  []*glfw.Monitor
-	drawSlide func()
+	x, y     int
+	path     string
+	textEdit qml.Object
+	cellQml  qml.Object
+	window   *qml.Window
+	win      *glfw.Window
+	slides   slide
+	err      error
+	monitors []*glfw.Monitor
+	mw1      *imagick.MagickWand
+	tex1     uint32
+	//drawSlide func()
 )
 
 func main() {
@@ -54,6 +58,14 @@ func main() {
 
 func run() error {
 	var mainQml qml.Object
+	imagick.Initialize()
+	defer imagick.Terminate()
+	mw1 = imagick.NewMagickWand()
+
+	err = mw1.ReadImage("logo:")
+	if err != nil {
+		panic(err)
+	}
 
 	engine := qml.NewEngine()
 	path, err = osext.ExecutableFolder()
@@ -81,15 +93,100 @@ func run() error {
 	})
 
 	window.Wait()
+	mw1.Destroy()
 	return nil
+}
+
+func setupScene() {
+
+	gl.ClearColor(0.1, 0.5, 0.9, 0.0)
+	mw2 := resizeImage(mw1, x, y, true, true)
+
+	tex1 = newTexture(*mw2)
+
+	gl.MatrixMode(gl.PROJECTION)
+	gl.LoadIdentity()
+	gl.Ortho(-1, 1, -1, 1, 1.0, 10.0)
+	gl.MatrixMode(gl.MODELVIEW)
+	gl.LoadIdentity()
+}
+
+func drawSlide() {
+	gl.Clear(gl.COLOR_BUFFER_BIT)
+
+	gl.MatrixMode(gl.MODELVIEW)
+	gl.LoadIdentity()
+	gl.Translatef(0, 0, -3.0)
+
+	gl.Begin(gl.QUADS)
+
+	gl.TexCoord2f(0, 0)
+	gl.Vertex3f(-1, 1, 0)
+
+	gl.TexCoord2f(1, 0)
+	gl.Vertex3f(1, 1, 0)
+
+	gl.TexCoord2f(1, 1)
+	gl.Vertex3f(1, -1, 0)
+
+	gl.TexCoord2f(0, 1)
+	gl.Vertex3f(-1, -1, 0)
+
+	gl.End()
+
+}
+
+func newTexture(mw imagick.MagickWand) uint32 {
+	x1 := mw.GetImageWidth()
+	y1 := mw.GetImageHeight()
+	rgba := image.NewRGBA(image.Rect(0, 0, int(x1), int(y1)))
+	if rgba.Stride != rgba.Rect.Size().X*4 {
+		panic("unsupported stride")
+	}
+	TPix, _ := mw.ExportImagePixels(0, 0, x1, y1, "RGBA", imagick.PIXEL_CHAR)
+	rgba.Pix = TPix.([]uint8)
+
+	var texture1 uint32
+	gl.Enable(gl.TEXTURE_2D)
+	gl.GenTextures(1, &texture1)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexImage2D(
+		gl.TEXTURE_2D,
+		0,
+		gl.RGBA,
+		int32(rgba.Rect.Size().X),
+		int32(rgba.Rect.Size().Y),
+		0,
+		gl.RGBA,
+		gl.UNSIGNED_BYTE,
+		gl.Ptr(rgba.Pix))
+
+	return texture1
 }
 
 func checkMon() {
 	monitors = glfw.GetMonitors()
+	glfw.WindowHint(glfw.ContextVersionMajor, 2)
+	glfw.WindowHint(glfw.ContextVersionMinor, 1)
+	glfw.WindowHint(glfw.AutoIconify, glfw.False)
+	glfw.WindowHint(glfw.Decorated, glfw.False)
 	if i := len(monitors); i < 2 {
 		fmt.Println("You only have 1 monitor!!!!!!!!!!! :-P")
+		win, err = glfw.CreateWindow(600, 800, "Cube", nil, nil)
+		if err != nil {
+			panic(err)
+		}
 	} else {
 		fmt.Printf("You have %d monitors\n", i)
+		x = monitors[1].GetVideoMode().Width
+		y = monitors[1].GetVideoMode().Height
+		win, err = glfw.CreateWindow(x, y, "Cube", nil, nil)
+		fmt.Println(win.GetPos())
+		win.SetPos(monitors[1].GetPos())
+		fmt.Println(x, y)
+		if err != nil {
+			panic(err)
+		}
 	}
 	monitorInfo()
 
@@ -109,24 +206,17 @@ func glInit() {
 		log.Fatalln("failed to initialize glfw:", err)
 	}
 	checkMon()
-	glfw.WindowHint(glfw.ContextVersionMajor, 2)
-	glfw.WindowHint(glfw.ContextVersionMinor, 1)
-
-	win, err = glfw.CreateWindow(800, 600, "Cube", nil, nil)
-	if err != nil {
-		panic(err)
-	}
 
 	win.MakeContextCurrent()
 
 	if err := gl.Init(); err != nil {
 		panic(err)
 	}
+	setupScene()
+	win.SetPos(monitors[1].GetPos())
 
-	gl.ClearColor(0.1, 0.5, 0.9, 0.0)
 	qml.Func1 = func() int {
 		if !win.ShouldClose() {
-			gl.Clear(gl.COLOR_BUFFER_BIT)
 			drawSlide()
 			win.SwapBuffers()
 			glfw.PollEvents()
