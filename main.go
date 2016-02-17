@@ -1,8 +1,6 @@
 // PresentationApp project main.go
 package main
 
-import "C"
-
 import (
 	"fmt"
 	"image"
@@ -18,25 +16,26 @@ import (
 )
 
 type cell struct {
-	text string
-	//img   image.Image
+	text    string
+	img     image.RGBA
 	qmlcell qml.Object
 	index   int
 }
-type slide []cell
+type slide []*cell
 
 var (
-	x, y     int
-	path     string
-	textEdit qml.Object
-	cellQml  qml.Object
-	window   *qml.Window
-	win      *glfw.Window
-	slides   slide
-	err      error
-	monitors []*glfw.Monitor
-	mw1      *imagick.MagickWand
-	tex1     uint32
+	x, y        int
+	path        string
+	textEdit    qml.Object
+	cellQml     qml.Object
+	window      *qml.Window
+	win         *glfw.Window
+	slides      slide
+	err         error
+	monitors    []*glfw.Monitor
+	projMonitor *glfw.Monitor
+	mw1, mw2    *imagick.MagickWand
+	tex1        uint32
 	//drawSlide func()
 )
 
@@ -48,6 +47,7 @@ func main() {
 	}
 
 	defer glfw.Terminate()
+	fmt.Println("test")
 
 }
 
@@ -88,19 +88,19 @@ func run() error {
 	setSignals()
 
 	window.Show()
-	qml.RunMain(func() {
-		glInit()
-	})
+	qml.RunMain(glInit)
 
 	window.Wait()
-	mw1.Destroy()
+	//win.Destroy()
+	mw2.Destroy()
+	imagick.Terminate()
 	return nil
 }
 
 func setupScene() {
 
 	gl.ClearColor(0.1, 0.5, 0.9, 0.0)
-	mw2 := resizeImage(mw1, x, y, true, true)
+	mw2 = resizeImage(mw1, x, y, true, true)
 
 	tex1 = newTexture(*mw2)
 
@@ -172,10 +172,13 @@ func checkMon() {
 	glfw.WindowHint(glfw.Decorated, glfw.False)
 	if i := len(monitors); i < 2 {
 		fmt.Println("You only have 1 monitor!!!!!!!!!!! :-P")
-		win, err = glfw.CreateWindow(600, 800, "Cube", nil, nil)
+		x = 800
+		y = 600
+		win, err = glfw.CreateWindow(x, y, "Cube", nil, nil)
 		if err != nil {
 			panic(err)
 		}
+		projMonitor = monitors[0]
 	} else {
 		fmt.Printf("You have %d monitors\n", i)
 		x = monitors[1].GetVideoMode().Width
@@ -187,6 +190,7 @@ func checkMon() {
 		if err != nil {
 			panic(err)
 		}
+		projMonitor = monitors[1]
 	}
 	monitorInfo()
 
@@ -213,7 +217,7 @@ func glInit() {
 		panic(err)
 	}
 	setupScene()
-	win.SetPos(monitors[1].GetPos())
+	win.SetPos(projMonitor.GetPos())
 
 	qml.Func1 = func() int {
 		if !win.ShouldClose() {
@@ -223,7 +227,7 @@ func glInit() {
 			return 0
 		} else {
 			win.Hide()
-
+			win.Destroy()
 			return 1
 		}
 	}
@@ -231,16 +235,29 @@ func glInit() {
 }
 
 func setSignals() {
+	window.On("closing", func() {
+		fmt.Println(window.Bool("cls"))
+		win.Hide()
+		//win.Destroy()
+		window.Set("cls", true)
+
+	})
 	textEdit.ObjectByName("textEdit1").On("focusChanged", func(focus bool) {
 		var (
 			str string
-			cel cell
+			cel *cell
 		)
 
 		if !focus {
+
 			str = textEdit.ObjectByName("textEdit1").String("text")
 			cel = slides[textEdit.Int("cell")]
-			cel.qmlcell.ObjectByName("cellText").Set("text", str)
+			if textEdit.Bool("txt") {
+				cel.qmlcell.ObjectByName("cellText").Set("text", str)
+				//fmt.Println("haha.....:-P")
+				cel.text = str
+				//fmt.Println("----->"+cel.text, str, textEdit.Int("cell"))
+			}
 		}
 	})
 
@@ -249,6 +266,7 @@ func setSignals() {
 func (cl *cell) setSignal() {
 	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {
 		cellText := cl.qmlcell.ObjectByName("cellText")
+
 		textEdit.Set("cell", cl.index)
 		textEdit.Set("x", cellText.Int("x")+4)
 		textEdit.Set("y", cellText.Int("y")+4)
@@ -258,6 +276,8 @@ func (cl *cell) setSignal() {
 		textEdit.Set("visible", true)
 		textEdit.ObjectByName("textEdit1").Set("focus", true)
 		textEdit.Set("enabled", true)
+
+		textEdit.ObjectByName("textEdit1").Set("text", cl.text)
 	})
 
 }
@@ -273,7 +293,7 @@ func (sl *slide) addCell( /*cl *cell*/ ) {
 
 	cl.text = "testing 1... 2... 3..."
 	cl.qmlcell.ObjectByName("cellText").Set("text", cl.text)
-	*sl = append(*sl, cl)
+	*sl = append(*sl, &cl)
 
 	cl.setSignal()
 

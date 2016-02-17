@@ -12,7 +12,12 @@ ApplicationWindow {
     minimumHeight: 500
     width: 1000
     height: 600
-    Screen.objectName: "Screen1"
+    property bool cls: false
+    //Screen.objectName: "Screen1"
+    onClosing: if (!cls) {
+        close.accepted = false
+        }
+
     AboutDialog { id: aboutDialog }
 
     Action {
@@ -130,22 +135,44 @@ ApplicationWindow {
     Rectangle {
         id: textEdit
         property int cell
-        x: 448
-        y: 151
+        x: 232
+        y: 622
         objectName: "textEdit"
         width: 200
         height: 200
         color: "#ffffff"
         visible: false
-        Keys.onEscapePressed: {
-            x = -100
-            y = -100
-            visible = false
-            focus = true
-            enabled = false
-            opacity = 0
-            textEdit1.focus = false
+        property bool txt: true
+        Keys.onPressed: {
+            if ((event.key == Qt.Key_Return) && (event.modifiers & Qt.ControlModifier)) {
+                txt = true
+
+                x = -100
+                y = -100
+                visible = false
+                focus = true
+                enabled = false
+                opacity = 0
+                textEdit1.focus = false
+
+
+                event.accepted = true
+            }
+            if (event.key == Qt.Key_Escape) {
+                txt = false
+                x = -100
+                y = -100
+                visible = false
+                focus = true
+                enabled = false
+                opacity = 0
+                textEdit1.focus = false
+
+
+                event.accepted = true
+            }
         }
+
 
         TextArea {
             id: textEdit1

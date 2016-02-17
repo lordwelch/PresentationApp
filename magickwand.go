@@ -2,7 +2,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/gographics/imagick/imagick"
@@ -13,7 +12,7 @@ func resizeImage(mw *imagick.MagickWand, newWidth, newHeight int, keepSpecSize, 
 		width, height, origHeight, origWidth int
 	)
 	origHeight = int(mw.GetImageHeight())
-	fmt.Println("hahahahahah :-P")
+	//fmt.Println("hahahahahah :-P")
 	origWidth = int(mw.GetImageWidth())
 
 	if (origHeight != newHeight) || (origWidth != newWidth) {
@@ -35,7 +34,7 @@ func resizeImage(mw *imagick.MagickWand, newWidth, newHeight int, keepSpecSize, 
 		center = false
 	} else {
 		resmw.NewImage(uint(newWidth), uint(newHeight), imagick.NewPixelWand())
-		fmt.Println(resmw.GetImageHeight(), resmw.GetImageWidth())
+		//fmt.Println(resmw.GetImageHeight(), resmw.GetImageWidth())
 		if center {
 			err = mw.ResizeImage(uint(width), uint(height), imagick.FILTER_LANCZOS, 1)
 			if err != nil {
