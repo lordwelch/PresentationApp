@@ -9,10 +9,6 @@ Rectangle {
     border.width: 2
     anchors.right: parent.right
     anchors.left: parent.left
-    onFocusChanged: if (focus) {
-                        border.color = "gainsboro"
-                        color = "blue"
-                    }
 
     Text {
         id: cellText
@@ -25,11 +21,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.rightMargin: 0
         anchors.left: parent.left
-        anchors.leftMargin: 0
-        onFocusChanged: if (focus) {
-                            parent.border.color = "gainsboro"
-                            parent.color = "blue"
-                        }
+        anchors.leftMargin: 2
 
         MouseArea {
             id: cellMouse
@@ -38,19 +30,35 @@ Rectangle {
             objectName: "cellMouse"
             anchors.fill: parent
             onFocusChanged: if (focus) {
-                                parent.parent.border.color = "gainsboro"
-                                parent.parent.color = "blue"
+                                selected()
                             }
-            onClicked: focus = true
-            onEntered: if (containsMouse) {
-                           parent.parent.border.color = "skyblue"
-                           parent.parent.color = "darkblue"
-                           parent.color = "white"
-                       }
+
+            onClicked: {
+                focus = true
+                selected()
+                mouseXChanged(mouse)
+            }
+
+            onMouseXChanged: if (containsMouse) {
+                                 parent.parent.border.color = "skyblue"
+                                 parent.parent.color = "darkblue"
+                                 parent.color = "white"
+                             } else if (focus) {
+                                 parent.color = "black"
+                             }
+
             onExited: {
                 parent.parent.border.color = "white"
                 parent.parent.color = "white"
                 parent.color = "black"
+                if (focus) {
+                    focusChanged(focus)
+                }
+            }
+
+            function selected() {
+                parent.parent.border.color = "blue"
+                parent.parent.color = "gainsboro"
             }
         }
     }

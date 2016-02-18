@@ -43,6 +43,6 @@ import QtQuick.Dialogs 1.1
 MessageDialog {
     icon: StandardIcon.Information
     text: "Presentation App for use in a church service"
-    detailedText: "made in 2016 by Timmy Welch"
+    detailedText: "Made in 2016 by Timmy Welch."
     title: "About"
 }

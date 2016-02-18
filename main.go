@@ -235,6 +235,10 @@ func glInit() {
 }
 
 func setSignals() {
+	window.ObjectByName("btnAdd").On("clicked", func() {
+		slides.addCell()
+	})
+
 	window.On("closing", func() {
 		fmt.Println(window.Bool("cls"))
 		win.Hide()
@@ -242,6 +246,7 @@ func setSignals() {
 		window.Set("cls", true)
 
 	})
+
 	textEdit.ObjectByName("textEdit1").On("focusChanged", func(focus bool) {
 		var (
 			str string
@@ -294,7 +299,7 @@ func (sl *slide) addCell( /*cl *cell*/ ) {
 	cl.text = "testing 1... 2... 3..."
 	cl.qmlcell.ObjectByName("cellText").Set("text", cl.text)
 	*sl = append(*sl, &cl)
-
+	//fmt.Println("add Cell!!!!! :-P")
 	cl.setSignal()
 
 }

@@ -13,7 +13,7 @@ ApplicationWindow {
     width: 1000
     height: 600
     property bool cls: false
-    //Screen.objectName: "Screen1"
+
     onClosing: if (!cls) {
         close.accepted = false
         }
@@ -63,8 +63,6 @@ ApplicationWindow {
             objectName: "gridRect"
             width: 300
             color: "#00000000"
-            radius: 1
-            border.color: "#000000"
             border.width: 4
             anchors.left: parent.left
             anchors.leftMargin: 0
@@ -110,6 +108,7 @@ ApplicationWindow {
 
                     Column {
                         id: data2
+                        spacing: 1
                         objectName: "data2"
                         anchors.fill: parent
                     }
@@ -119,6 +118,7 @@ ApplicationWindow {
 
         Rectangle {
             id: mainView
+            border.width: 0
             objectName: "mainView"
             anchors.right: parent.right
             anchors.rightMargin: 0
@@ -129,6 +129,15 @@ ApplicationWindow {
             z: 1
             clip: false
             visible: true
+
+            Button {
+                id: button1
+                objectName: "btnAdd"
+                x: 8
+                y: 8
+                text: qsTr("Button")
+
+            }
         }
     }
 
@@ -177,7 +186,6 @@ ApplicationWindow {
         TextArea {
             id: textEdit1
             objectName: "textEdit1"
-            text: "Text Edit"
             anchors.fill: parent
             clip: true
             textFormat: Text.AutoText
