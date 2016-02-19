@@ -7,6 +7,7 @@ Rectangle {
     width: 100
     height: 100
     border.width: 2
+    border.color: "black"
     anchors.right: parent.right
     anchors.left: parent.left
 
@@ -31,6 +32,8 @@ Rectangle {
             anchors.fill: parent
             onFocusChanged: if (focus) {
                                 selected()
+                            } else {
+                                notSelected()
                             }
 
             onClicked: {
@@ -47,8 +50,11 @@ Rectangle {
                                  parent.color = "black"
                              }
 
-            onExited: {
-                parent.parent.border.color = "white"
+            onExited: notSelected()
+
+            function notSelected() {
+
+                parent.parent.border.color = "black"
                 parent.parent.color = "white"
                 parent.color = "black"
                 if (focus) {

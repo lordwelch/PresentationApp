@@ -34,9 +34,8 @@ var (
 	err         error
 	monitors    []*glfw.Monitor
 	projMonitor *glfw.Monitor
-	mw1, mw2    *imagick.MagickWand
+	mw1         *imagick.MagickWand
 	tex1        uint32
-	//drawSlide func()
 )
 
 func main() {
@@ -50,11 +49,6 @@ func main() {
 	fmt.Println("test")
 
 }
-
-/*func init() {
-	// GLFW event handling must run on the main OS thread
-	//runtime.LockOSThread()
-}*/
 
 func run() error {
 	var mainQml qml.Object
@@ -91,8 +85,8 @@ func run() error {
 	qml.RunMain(glInit)
 
 	window.Wait()
-	//win.Destroy()
-	mw2.Destroy()
+
+	mw1.Destroy()
 	imagick.Terminate()
 	return nil
 }
@@ -100,9 +94,9 @@ func run() error {
 func setupScene() {
 
 	gl.ClearColor(0.1, 0.5, 0.9, 0.0)
-	mw2 = resizeImage(mw1, x, y, true, true)
+	mw1 = resizeImage(mw1, x, y, true, true)
 
-	tex1 = newTexture(*mw2)
+	tex1 = newTexture(*mw1)
 
 	gl.MatrixMode(gl.PROJECTION)
 	gl.LoadIdentity()
@@ -242,7 +236,6 @@ func setSignals() {
 	window.On("closing", func() {
 		fmt.Println(window.Bool("cls"))
 		win.Hide()
-		//win.Destroy()
 		window.Set("cls", true)
 
 	})
@@ -259,9 +252,7 @@ func setSignals() {
 			cel = slides[textEdit.Int("cell")]
 			if textEdit.Bool("txt") {
 				cel.qmlcell.ObjectByName("cellText").Set("text", str)
-				//fmt.Println("haha.....:-P")
 				cel.text = str
-				//fmt.Println("----->"+cel.text, str, textEdit.Int("cell"))
 			}
 		}
 	})
@@ -270,13 +261,12 @@ func setSignals() {
 
 func (cl *cell) setSignal() {
 	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {
-		cellText := cl.qmlcell.ObjectByName("cellText")
 
 		textEdit.Set("cell", cl.index)
-		textEdit.Set("x", cellText.Int("x")+4)
-		textEdit.Set("y", cellText.Int("y")+4)
-		textEdit.Set("width", cellText.Int("width"))
-		textEdit.Set("height", cellText.Int("height"))
+		textEdit.Set("x", cl.qmlcell.Int("x")+4)
+		textEdit.Set("y", cl.qmlcell.Int("y")+4)
+		textEdit.Set("width", cl.qmlcell.Int("width"))
+		textEdit.Set("height", cl.qmlcell.Int("height"))
 		textEdit.Set("opacity", 100)
 		textEdit.Set("visible", true)
 		textEdit.ObjectByName("textEdit1").Set("focus", true)
@@ -299,7 +289,6 @@ func (sl *slide) addCell( /*cl *cell*/ ) {
 	cl.text = "testing 1... 2... 3..."
 	cl.qmlcell.ObjectByName("cellText").Set("text", cl.text)
 	*sl = append(*sl, &cl)
-	//fmt.Println("add Cell!!!!! :-P")
 	cl.setSignal()
 
 }

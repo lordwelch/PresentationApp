@@ -15,10 +15,12 @@ ApplicationWindow {
     property bool cls: false
 
     onClosing: if (!cls) {
-        close.accepted = false
-        }
+               //    close.accepted = false
+               }
 
-    AboutDialog { id: aboutDialog }
+    AboutDialog {
+        id: aboutDialog
+    }
 
     Action {
         id: aboutAction
@@ -96,7 +98,6 @@ ApplicationWindow {
                         anchors.bottom: parent.bottom
                         anchors.top: parent.top
                         anchors.left: parent.left
-                        //onAdded: children.width = data1.width
                     }
                 }
 
@@ -136,7 +137,6 @@ ApplicationWindow {
                 x: 8
                 y: 8
                 text: qsTr("Button")
-
             }
         }
     }
@@ -153,7 +153,8 @@ ApplicationWindow {
         visible: false
         property bool txt: true
         Keys.onPressed: {
-            if ((event.key == Qt.Key_Return) && (event.modifiers & Qt.ControlModifier)) {
+            if ((event.key == Qt.Key_Return)
+                    && (event.modifiers & Qt.ControlModifier)) {
                 txt = true
 
                 x = -100
@@ -164,9 +165,9 @@ ApplicationWindow {
                 opacity = 0
                 textEdit1.focus = false
 
-
                 event.accepted = true
             }
+
             if (event.key == Qt.Key_Escape) {
                 txt = false
                 x = -100
@@ -177,11 +178,9 @@ ApplicationWindow {
                 opacity = 0
                 textEdit1.focus = false
 
-
                 event.accepted = true
             }
         }
-
 
         TextArea {
             id: textEdit1
