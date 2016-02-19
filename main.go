@@ -17,7 +17,7 @@ import (
 
 type cell struct {
 	text    string
-	img     image.RGBA
+	img     imagick.Image
 	qmlcell qml.Object
 	index   int
 }
