@@ -3,6 +3,7 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.3
 import QtQuick.Window 2.0
 import "qml"
+import QtQuick.Layouts 1.2
 
 ApplicationWindow {
     id: applicationWindow1
@@ -91,7 +92,7 @@ ApplicationWindow {
                     transformOrigin: Item.TopLeft
                     border.width: 0
 
-                    Column {
+                    ColumnLayout {
                         id: data1
                         objectName: "data1"
                         spacing: 1
@@ -108,11 +109,12 @@ ApplicationWindow {
                     color: "#4f90e2"
                     border.width: 0
 
-                    Column {
+                    ColumnLayout {
                         id: data2
                         spacing: 1
                         objectName: "data2"
                         anchors.fill: parent
+
                     }
                 }
             }

@@ -1,10 +1,8 @@
-import QtQuick 2.0
+import QtQuick 2.4
 
 Rectangle {
-    enabled: true
     objectName: "cellRect"
     property int index: 0
-    width: 100
     height: 100
     border.width: 2
     border.color: "black"
