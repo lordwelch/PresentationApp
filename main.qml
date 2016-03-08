@@ -75,46 +75,50 @@ ApplicationWindow {
             anchors.top: parent.top
             anchors.topMargin: 0
 
-            SplitView {
-                id: gridData
-                objectName: "gridData"
-                anchors.rightMargin: 4
-                anchors.leftMargin: 4
-                anchors.bottomMargin: 4
-                anchors.topMargin: 4
+            ScrollView {
+                id: scview
                 anchors.fill: parent
+                anchors.margins: 4
 
-                Rectangle {
-                    id: col1
-                    objectName: "col1"
-                    width: gridData.width / 2
-                    color: "#e41616"
-                    transformOrigin: Item.TopLeft
-                    border.width: 0
+                SplitView {
+                    id: gridData
+                    objectName: "gridData"
+                    width: scview.width
+                    height: 100
 
-                    ColumnLayout {
-                        id: data1
-                        objectName: "data1"
-                        spacing: 1
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        anchors.top: parent.top
-                        anchors.left: parent.left
+                    Rectangle {
+                        id: col1
+                        objectName: "col1"
+                        width: gridData.width / 2
+                        color: "#e41616"
+                        transformOrigin: Item.TopLeft
+                        border.width: 0
+
+                        Column {
+                            id: data1
+                            objectName: "data1"
+                            spacing: 1
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+
+
+                        }
                     }
-                }
 
-                Rectangle {
-                    id: col2
-                    objectName: "col2"
-                    color: "#4f90e2"
-                    border.width: 0
+                    Rectangle {
+                        id: col2
+                        objectName: "col2"
+                        color: "#4f90e2"
+                        border.width: 0
 
-                    ColumnLayout {
-                        id: data2
-                        spacing: 1
-                        objectName: "data2"
-                        anchors.fill: parent
-
+                        Column {
+                            id: data2
+                            spacing: 1
+                            objectName: "data2"
+                            anchors.fill: parent
+                        }
                     }
                 }
             }
