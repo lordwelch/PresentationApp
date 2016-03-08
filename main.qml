@@ -74,6 +74,7 @@ ApplicationWindow {
             anchors.bottomMargin: 0
             anchors.top: parent.top
             anchors.topMargin: 0
+            property int count: 0
 
             ScrollView {
                 id: scview
@@ -84,7 +85,7 @@ ApplicationWindow {
                     id: gridData
                     objectName: "gridData"
                     width: scview.width
-                    height: 100
+                    height: gridRect.count*100
 
                     Rectangle {
                         id: col1

@@ -303,7 +303,7 @@ func (sl *slide) addCell( /*cl *cell*/ ) {
 	var cl cell
 
 	cl.index = len(*sl)
-
+	window.ObjectByName("gridRect").Set("count", window.ObjectByName("gridRect").Int("count")+1)
 	cl.qmlcell = cellQml.Create(nil)
 	cl.qmlcell.Set("objectName", fmt.Sprintf("cellRect%d", len(*sl)))
 	cl.qmlcell.Set("parent", window.ObjectByName("data1"))
