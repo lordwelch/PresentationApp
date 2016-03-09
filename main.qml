@@ -94,6 +94,58 @@ ApplicationWindow {
                         color: "#e41616"
                         transformOrigin: Item.TopLeft
                         border.width: 0
+    Rectangle {
+        id: textEdit
+        property int cell
+        x: 232
+        y: 622
+        objectName: "textEdit"
+        width: 200
+        height: 200
+        color: "#ffffff"
+        visible: false
+        property bool txt: true
+        Keys.onPressed: {
+            if ((event.key == Qt.Key_Return)
+                    && (event.modifiers & Qt.ControlModifier)) {
+                txt = true
+
+                x = -100
+                y = -100
+                visible = false
+                focus = true
+                enabled = false
+                opacity = 0
+                textEdit1.focus = false
+
+                event.accepted = true
+            }
+
+            if (event.key == Qt.Key_Escape) {
+                txt = false
+                x = -100
+                y = -100
+                visible = false
+                focus = true
+                enabled = false
+                opacity = 0
+                textEdit1.focus = false
+
+                event.accepted = true
+            }
+        }
+
+        TextArea {
+            id: textEdit1
+            objectName: "textEdit1"
+            anchors.fill: parent
+            clip: true
+            textFormat: Text.AutoText
+            visible: true
+            font.pixelSize: 12
+            z: 99
+        }
+    }
 
                         Column {
                             id: data1
@@ -149,56 +201,4 @@ ApplicationWindow {
         }
     }
 
-    Rectangle {
-        id: textEdit
-        property int cell
-        x: 232
-        y: 622
-        objectName: "textEdit"
-        width: 200
-        height: 200
-        color: "#ffffff"
-        visible: false
-        property bool txt: true
-        Keys.onPressed: {
-            if ((event.key == Qt.Key_Return)
-                    && (event.modifiers & Qt.ControlModifier)) {
-                txt = true
-
-                x = -100
-                y = -100
-                visible = false
-                focus = true
-                enabled = false
-                opacity = 0
-                textEdit1.focus = false
-
-                event.accepted = true
-            }
-
-            if (event.key == Qt.Key_Escape) {
-                txt = false
-                x = -100
-                y = -100
-                visible = false
-                focus = true
-                enabled = false
-                opacity = 0
-                textEdit1.focus = false
-
-                event.accepted = true
-            }
-        }
-
-        TextArea {
-            id: textEdit1
-            objectName: "textEdit1"
-            anchors.fill: parent
-            clip: true
-            textFormat: Text.AutoText
-            visible: true
-            font.pixelSize: 12
-            z: 99
-        }
-    }
 }

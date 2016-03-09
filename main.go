@@ -285,10 +285,11 @@ func (cl *cell) setSignal() {
 	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {
 
 		textEdit.Set("cell", cl.index)
-		textEdit.Set("x", cl.qmlcell.Int("x")+4)
-		textEdit.Set("y", cl.qmlcell.Int("y")+4)
+        textEdit.Set("x", cl.qmlcell.Int("x"))
+		textEdit.Set("y", cl.qmlcell.Int("y"))
 		textEdit.Set("width", cl.qmlcell.Int("width"))
 		textEdit.Set("height", cl.qmlcell.Int("height"))
+        textEdit.Set("z", 100)
 		textEdit.Set("opacity", 100)
 		textEdit.Set("visible", true)
 		textEdit.ObjectByName("textEdit1").Set("focus", true)
