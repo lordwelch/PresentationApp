@@ -251,7 +251,6 @@ func setSignals() {
 	})
 
 	window.On("closing", func() {
-		fmt.Println(window.Bool("cls"))
 		win.Hide()
 		window.Set("cls", true)
 
