@@ -55,7 +55,7 @@ func main() {
 func run() error {
 	var mainQml qml.Object
 	imagick.Initialize()
-	defer imagick.Terminate()
+
 	mw1 = imagick.NewMagickWand()
 
 	err = mw1.ReadImage("logo:")
@@ -89,6 +89,7 @@ func run() error {
 	textEdit = window.ObjectByName("textEdit")
 	slides.addCell()
 	setSignals()
+	imgready = true
 
 	window.Show()
 	qml.RunMain(glInit)
@@ -112,6 +113,7 @@ func setupScene() {
 	gl.Ortho(-1, 1, -1, 1, 1.0, 10.0)
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
+
 }
 
 func drawSlide() {
@@ -156,6 +158,7 @@ func newTexture(rgba image.RGBA) uint32 {
 		gl.Ptr(rgba.Pix))
 
 	return texture1
+
 }
 
 func checkMon() {
@@ -198,6 +201,7 @@ func monitorInfo() {
 		fmt.Printf("monitor name: %s\n", mon.GetName())
 		i, t := mon.GetPos()
 		fmt.Printf("position X: %d  Y: %d\n", i, t)
+
 	}
 
 }
@@ -222,13 +226,14 @@ func glInit() {
 			drawSlide()
 			win.SwapBuffers()
 			return 0
+
 		} else {
 			win.Hide()
 			win.Destroy()
 			return 1
+
 		}
 	}
-
 }
 
 func setSignals() {
@@ -285,11 +290,11 @@ func (cl *cell) setSignal() {
 	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {
 
 		textEdit.Set("cell", cl.index)
-        textEdit.Set("x", cl.qmlcell.Int("x"))
+		textEdit.Set("x", cl.qmlcell.Int("x"))
 		textEdit.Set("y", cl.qmlcell.Int("y"))
 		textEdit.Set("width", cl.qmlcell.Int("width"))
 		textEdit.Set("height", cl.qmlcell.Int("height"))
-        textEdit.Set("z", 100)
+		textEdit.Set("z", 100)
 		textEdit.Set("opacity", 100)
 		textEdit.Set("visible", true)
 		textEdit.ObjectByName("textEdit1").Set("focus", true)

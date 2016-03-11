@@ -2,7 +2,6 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"strconv"
 )
@@ -11,11 +10,15 @@ import (
 
 Image {
     source: "image://images/`*/
+var imgready = false
 
 func imgProvider(id string, width, height int) image.Image {
-	var i int
-	fmt.Println("id: ", id)
-	i, _ = strconv.Atoi(id)
-	fmt.Println("haha: ", i)
-	return slides[i].getImage(width, height)
+	if imgready {
+		i, _ := strconv.Atoi(id)
+		return slides[i].getImage(width, height)
+
+	} else {
+		var img1 image.Image = image.NewRGBA(image.Rect(0, 0, 340, 480))
+		return img1
+	}
 }
