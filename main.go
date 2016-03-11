@@ -7,17 +7,18 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 
 	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
-	"github.com/gographics/imagick/imagick"
 	"github.com/kardianos/osext"
 	"github.com/lordwelch/qml"
+	"gopkg.in/gographics/imagick.v2/imagick"
 )
 
 type cell struct {
 	text    string
-	img     imagick.Image
+	img     *imagick.MagickWand
 	qmlimg  qml.Object
 	qmlcell qml.Object
 	index   int
@@ -48,7 +49,6 @@ func main() {
 	}
 
 	defer glfw.Terminate()
-	fmt.Println("test")
 
 }
 
@@ -241,6 +241,15 @@ func setSignals() {
 		slides.addCell()
 	})
 
+	window.ObjectByName("btnRem").On("clicked", func() {
+		slides[len(slides)-1].remove()
+		fmt.Println("testing....")
+	})
+
+	window.ObjectByName("btnMem").On("clicked", func() {
+		debug.FreeOSMemory()
+	})
+
 	window.On("closing", func() {
 		fmt.Println(window.Bool("cls"))
 		win.Hide()
@@ -268,7 +277,8 @@ func setSignals() {
 }
 
 func (cl cell) getImage(x, y int) (img *image.RGBA) {
-	mw := imagick.NewMagickWandFromImage(&cl.img)
+	mw := cl.img.GetImage()
+	//mw := imagick.NewMagickWandFromImage(cl.img)
 	if (x == 0) || (y == 0) {
 		x = int(mw.GetImageWidth())
 		y = int(mw.GetImageHeight())
@@ -315,9 +325,8 @@ func (sl *slide) addCell( /*cl *cell*/ ) {
 	cl.qmlcell.Set("parent", window.ObjectByName("data1"))
 	cl.qmlcell.Set("index", cl.index)
 
-	mw := imagick.NewMagickWand()
-	mw.ReadImage("logo:")
-	cl.img = *mw.GetImageFromMagickWand()
+	cl.img = imagick.NewMagickWand()
+	cl.img.ReadImage("logo:")
 
 	cl.text = "testing 1... 2... 3..."
 	cl.qmlcell.ObjectByName("cellText").Set("text", cl.text)
@@ -330,6 +339,27 @@ func (sl *slide) addCell( /*cl *cell*/ ) {
 	cl.qmlimg.Set("parent", window.ObjectByName("data2"))
 	cl.qmlimg.Set("index", cl.index)
 
+}
+
+func (cl *cell) remove() {
+	cl.text = ""
+	cl.qmlimg.Destroy()
+	cl.img.Destroy()
+	cl.qmlcell.Destroy()
+	window.ObjectByName("gridRect").Set("count", window.ObjectByName("gridRect").Int("count")-1)
+	slides.remove(cl.index)
+	cl.index = -1
+
+}
+
+func (sl *slide) remove(i int) {
+	//*sl = append((*sl)[:i], (*sl)[i+1:]...)
+
+	/*copy((*sl)[i:], (*sl)[i+1:])
+	(*sl)[len(*sl)-1] = nil // or the zero value of T
+	*sl = (*sl)[:len((*sl))-1]*/
+	// or, more simply:
+	*sl, (*sl)[len((*sl))-1] = append((*sl)[:i], (*sl)[i+1:]...), nil
 }
 
 func (cl cell) String() string {

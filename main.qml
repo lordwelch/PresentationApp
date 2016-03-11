@@ -80,18 +80,20 @@ ApplicationWindow {
                 id: scview
                 anchors.fill: parent
                 anchors.margins: 4
+                horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+                verticalScrollBarPolicy: Qt.ScrollBarAlwaysOn
 
                 SplitView {
                     id: gridData
                     objectName: "gridData"
-                    width: scview.width
-                    height: gridRect.count*100
+                    width: scview.width - 1
+                    height: gridRect.count * 101
 
                     Rectangle {
                         id: col1
                         objectName: "col1"
                         width: gridData.width / 2
-                        color: "#e41616"
+                        color: "#00000000"
                         transformOrigin: Item.TopLeft
                         border.width: 0
     Rectangle {
@@ -151,19 +153,14 @@ ApplicationWindow {
                             id: data1
                             objectName: "data1"
                             spacing: 1
-                            anchors.right: parent.right
-                            anchors.bottom: parent.bottom
-                            anchors.top: parent.top
-                            anchors.left: parent.left
-
-
+                            anchors.fill: parent
                         }
                     }
 
                     Rectangle {
                         id: col2
                         objectName: "col2"
-                        color: "#4f90e2"
+                        color: "#00000000"
                         border.width: 0
 
                         Column {
@@ -197,6 +194,22 @@ ApplicationWindow {
                 x: 8
                 y: 8
                 text: qsTr("Button")
+            }
+
+            Button {
+                id: button2
+                x: 8
+                y: 39
+                text: qsTr("Button")
+                objectName: "btnRem"
+            }
+
+            Button {
+                id: button3
+                x: 8
+                y: 70
+                text: qsTr("Button")
+                objectName: "btnMem"
             }
         }
     }
