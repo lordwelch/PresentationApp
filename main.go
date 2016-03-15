@@ -37,7 +37,7 @@ var (
 	err         error
 	monitors    []*glfw.Monitor
 	projMonitor *glfw.Monitor
-	mw1         *imagick.MagickWand
+	//mw1         *imagick.MagickWand
 	tex1        uint32
 )
 
@@ -55,13 +55,6 @@ func main() {
 func run() error {
 	var mainQml qml.Object
 	imagick.Initialize()
-
-	mw1 = imagick.NewMagickWand()
-
-	err = mw1.ReadImage("logo:")
-	if err != nil {
-		panic(err)
-	}
 
 	engine := qml.NewEngine()
 	engine.AddImageProvider("images", imgProvider)
@@ -96,15 +89,13 @@ func run() error {
 
 	window.Wait()
 
-	mw1.Destroy()
 	imagick.Terminate()
 	return nil
 }
 
 func setupScene() {
 
-	gl.ClearColor(0.1, 0.5, 0.9, 0.0)
-	mw1 = resizeImage(mw1, x0, y0, true, true)
+	gl.ClearColor(0, 0, 0, 0)
 
 	tex1 = newTexture(*slides[0].getImage(x0, y0))
 
@@ -277,7 +268,6 @@ func setSignals() {
 
 func (cl cell) getImage(x, y int) (img *image.RGBA) {
 	mw := cl.img.GetImage()
-	//mw := imagick.NewMagickWandFromImage(cl.img)
 	if (x == 0) || (y == 0) {
 		x = int(mw.GetImageWidth())
 		y = int(mw.GetImageHeight())
@@ -288,10 +278,10 @@ func (cl cell) getImage(x, y int) (img *image.RGBA) {
 	if img.Stride != img.Rect.Size().X*4 {
 		panic("unsupported stride")
 	}
-	//	TPix, _ :=
+
 	Tpix, _ := mw.ExportImagePixels(0, 0, uint(x), uint(y), "RGBA", imagick.PIXEL_CHAR)
 	img.Pix = Tpix.([]uint8)
-	defer mw.Destroy()
+	mw.Destroy()
 	return
 }
 
@@ -301,7 +291,6 @@ func (cl *cell) setSignal() {
 		textEdit.Set("cell", cl.index)
 		textEdit.Set("x", cl.qmlcell.Int("x"))
 		textEdit.Set("y", cl.qmlcell.Int("y"))
-		textEdit.Set("width", cl.qmlcell.Int("width"))
 		textEdit.Set("height", cl.qmlcell.Int("height"))
 		textEdit.Set("z", 100)
 		textEdit.Set("opacity", 100)
@@ -343,8 +332,8 @@ func (sl *slide) addCell( /*cl *cell*/ ) {
 func (cl *cell) remove() {
 	cl.text = ""
 	cl.qmlimg.Destroy()
-	cl.img.Destroy()
 	cl.qmlcell.Destroy()
+	cl.img.Destroy()
 	window.ObjectByName("gridRect").Set("count", window.ObjectByName("gridRect").Int("count")-1)
 	slides.remove(cl.index)
 	cl.index = -1
@@ -352,12 +341,6 @@ func (cl *cell) remove() {
 }
 
 func (sl *slide) remove(i int) {
-	//*sl = append((*sl)[:i], (*sl)[i+1:]...)
-
-	/*copy((*sl)[i:], (*sl)[i+1:])
-	(*sl)[len(*sl)-1] = nil // or the zero value of T
-	*sl = (*sl)[:len((*sl))-1]*/
-	// or, more simply:
 	*sl, (*sl)[len((*sl))-1] = append((*sl)[:i], (*sl)[i+1:]...), nil
 }
 
