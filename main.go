@@ -26,19 +26,20 @@ type cell struct {
 type slide []*cell
 
 var (
-	x0, y0      int
-	path        string
-	qimg        qml.Object
-	textEdit    qml.Object
-	cellQml     qml.Object
-	window      *qml.Window
-	win         *glfw.Window
-	slides      slide
-	err         error
-	monitors    []*glfw.Monitor
-	projMonitor *glfw.Monitor
+	x0, y0, selSlide      int
+	path                  string
+	qimg                  qml.Object
+	textEdit              qml.Object
+	cellQml               qml.Object
+	window                *qml.Window
+	win                   *glfw.Window
+	slides                slide
+	err                   error
+	monitors              []*glfw.Monitor
+	projMonitor           *glfw.Monitor
 	//mw1         *imagick.MagickWand
-	tex1        uint32
+	tex1                  uint32
+	texDel                Bool
 )
 
 func main() {
@@ -96,14 +97,17 @@ func run() error {
 func setupScene() {
 
 	gl.ClearColor(0, 0, 0, 0)
-
-	tex1 = newTexture(*slides[0].getImage(x0, y0))
+	if texDel {
+		gl.DeleteTextures(1,tex1)
+	}
+	tex1 = newTexture(*slides[selSlide].getImage(x0, y0))
 
 	gl.MatrixMode(gl.PROJECTION)
 	gl.LoadIdentity()
 	gl.Ortho(-1, 1, -1, 1, 1.0, 10.0)
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
+	texDel = true
 
 }
 
@@ -286,6 +290,11 @@ func (cl cell) getImage(x, y int) (img *image.RGBA) {
 }
 
 func (cl *cell) setSignal() {
+	cl.qmlcell.ObjectByName("cellMouse").On("clicked", func() {
+		cl.qmlcell.ObjectByName("cellMouse").Set("focus", true)
+		setupScene()
+	}
+	
 	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {
 
 		textEdit.Set("cell", cl.index)
