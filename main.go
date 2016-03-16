@@ -26,20 +26,19 @@ type cell struct {
 type slide []*cell
 
 var (
-	x0, y0, selSlide      int
-	path                  string
-	qimg                  qml.Object
-	textEdit              qml.Object
-	cellQml               qml.Object
-	window                *qml.Window
-	win                   *glfw.Window
-	slides                slide
-	err                   error
-	monitors              []*glfw.Monitor
-	projMonitor           *glfw.Monitor
-	//mw1         *imagick.MagickWand
-	tex1                  uint32
-	texDel                Bool
+	x0, y0, selSlide int
+	path             string
+	qimg             qml.Object
+	textEdit         qml.Object
+	cellQml          qml.Object
+	window           *qml.Window
+	win              *glfw.Window
+	slides           slide
+	err              error
+	monitors         []*glfw.Monitor
+	projMonitor      *glfw.Monitor
+	tex1             uint32
+	texDel           = false
 )
 
 func main() {
@@ -48,8 +47,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
-
-	defer glfw.Terminate()
 
 }
 
@@ -98,7 +95,7 @@ func setupScene() {
 
 	gl.ClearColor(0, 0, 0, 0)
 	if texDel {
-		gl.DeleteTextures(1,tex1)
+		gl.DeleteTextures(1, &tex1)
 	}
 	tex1 = newTexture(*slides[selSlide].getImage(x0, y0))
 
@@ -212,8 +209,9 @@ func glInit() {
 	if err := gl.Init(); err != nil {
 		panic(err)
 	}
-	setupScene()
+
 	win.SetPos(projMonitor.GetPos())
+	setupScene()
 
 	qml.Func1 = func() int {
 		if !win.ShouldClose() {
@@ -224,7 +222,8 @@ func glInit() {
 
 		} else {
 			win.Hide()
-			win.Destroy()
+			//win.Destroy()
+			glfw.Terminate()
 			return 1
 
 		}
@@ -238,7 +237,6 @@ func setSignals() {
 
 	window.ObjectByName("btnRem").On("clicked", func() {
 		slides[len(slides)-1].remove()
-		fmt.Println("testing....")
 	})
 
 	window.ObjectByName("btnMem").On("clicked", func() {
@@ -246,7 +244,7 @@ func setSignals() {
 	})
 
 	window.On("closing", func() {
-		win.Hide()
+		win.SetShouldClose(true)
 		window.Set("cls", true)
 
 	})
@@ -293,8 +291,8 @@ func (cl *cell) setSignal() {
 	cl.qmlcell.ObjectByName("cellMouse").On("clicked", func() {
 		cl.qmlcell.ObjectByName("cellMouse").Set("focus", true)
 		setupScene()
-	}
-	
+	})
+
 	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {
 
 		textEdit.Set("cell", cl.index)
