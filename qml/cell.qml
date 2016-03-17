@@ -28,17 +28,6 @@ Rectangle {
             enabled: true
             objectName: "cellMouse"
             anchors.fill: parent
-            onFocusChanged: if (focus) {
-                                selected()
-                            } else {
-                                notSelected()
-                            }
-
-            onClicked: {
-                focus = true
-                selected()
-                mouseXChanged(mouse)
-            }
 
             onMouseXChanged: if (containsMouse) {
                                  parent.parent.border.color = "skyblue"
@@ -48,21 +37,20 @@ Rectangle {
                                  parent.color = "black"
                              }
 
-            onExited: notSelected()
+            onExited: focusChanged(focus)
 
             function notSelected() {
 
                 parent.parent.border.color = "black"
                 parent.parent.color = "white"
                 parent.color = "black"
-                if (focus) {
-                    focusChanged(focus)
-                }
+                MouseXChanged(mouse)
             }
 
             function selected() {
                 parent.parent.border.color = "blue"
                 parent.parent.color = "gainsboro"
+                MouseXChanged(mouse)
             }
         }
     }

@@ -293,6 +293,19 @@ func (cl *cell) setSignal() {
 		setupScene()
 	})
 
+	cl.qmlcell.ObjectByName("cellMouse").On("focusChanged", func(focus bool) {
+		if focus {
+			cl.qmlcell.ObjectByName("cellMouse").Call("selected")
+		} else {
+			cl.qmlcell.ObjectByName("cellMouse").Call("notSelected")
+		}
+	})
+
+    cl.qmlcell.ObjectByName("cellMouse").On("Clicked", func() {
+        cl.qmlcell.ObjectByName("cellMouse").Set("focus", true)
+        cl.qmlcell.ObjectByName("cellMouse").Call("selected")
+    })
+
 	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {
 
 		textEdit.Set("cell", cl.index)
