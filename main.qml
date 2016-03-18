@@ -16,9 +16,20 @@ ApplicationWindow {
     height: 600
     property bool cls: false
 
+    function openFileDialog() {
+        imgpicker.open()
+        return imgpicker.fileUrl
+    }
+
     onClosing: if (!cls) {
                    close.accepted = false
                }
+
+    FileDialog {
+        id: imgpicker
+        title: "Choose an image for this slide"
+        folder: shortcuts.pictures
+    }
 
     AboutDialog {
         id: aboutDialog
@@ -47,6 +58,17 @@ ApplicationWindow {
             }
         }
     }
+
+
+        Menu {
+            objectName: "mnuCtx"
+            title: "new image..."
+            MenuItem {
+                objectName: "mnuImgPick"
+                text: "new Image..."
+            }
+        }
+
 
     SplitView {
         id: mainSlider

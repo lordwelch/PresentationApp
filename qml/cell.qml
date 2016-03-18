@@ -28,6 +28,7 @@ Rectangle {
             enabled: true
             objectName: "cellMouse"
             anchors.fill: parent
+            acceptedButtons: Qt.AllButtons
 
             onMouseXChanged: if (containsMouse) {
                                  parent.parent.border.color = "skyblue"
@@ -44,13 +45,11 @@ Rectangle {
                 parent.parent.border.color = "black"
                 parent.parent.color = "white"
                 parent.color = "black"
-                MouseXChanged(mouse)
             }
 
             function selected() {
                 parent.parent.border.color = "blue"
                 parent.parent.color = "gainsboro"
-                MouseXChanged(mouse)
             }
         }
     }

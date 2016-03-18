@@ -26,19 +26,19 @@ type cell struct {
 type slide []*cell
 
 var (
-	x0, y0, selSlide int
-	path             string
-	qimg             qml.Object
-	textEdit         qml.Object
-	cellQml          qml.Object
-	window           *qml.Window
-	win              *glfw.Window
-	slides           slide
-	err              error
-	monitors         []*glfw.Monitor
-	projMonitor      *glfw.Monitor
-	tex1             uint32
-	texDel           = false
+	x0, y0, selSlide, rhtClkCell int
+	path                         string
+	qimg                         qml.Object
+	textEdit                     qml.Object
+	cellQml                      qml.Object
+	window                       *qml.Window
+	win                          *glfw.Window
+	slides                       slide
+	err                          error
+	monitors                     []*glfw.Monitor
+	projMonitor                  *glfw.Monitor
+	tex1                         uint32
+	texDel                       = false
 )
 
 func main() {
@@ -244,8 +244,10 @@ func setSignals() {
 	})
 
 	window.On("closing", func() {
-		win.SetShouldClose(true)
-		window.Set("cls", true)
+		if false == window.Property("cls") {
+			win.SetShouldClose(true)
+			window.Set("cls", true)
+		}
 
 	})
 
@@ -301,10 +303,21 @@ func (cl *cell) setSignal() {
 		}
 	})
 
-    cl.qmlcell.ObjectByName("cellMouse").On("Clicked", func() {
-        cl.qmlcell.ObjectByName("cellMouse").Set("focus", true)
-        cl.qmlcell.ObjectByName("cellMouse").Call("selected")
-    })
+	window.ObjectByName("mnuImgPick").On("triggered", func() {
+		url := window.Call("openFileDialog")
+		slides[rhtClkCell].img.Clear
+		slides[rhtClkCell].img.ReadImage(url)
+	})
+
+	cl.qmlcell.ObjectByName("cellMouse").On("clicked", func(mouse qml.Object) {
+		if mouse.Property("button") == 2 {
+			window.ObjectByName("mnuCtx").Call("popup")
+			rhtell = cl.index
+		} else {
+			cl.qmlcell.ObjectByName("cellMouse").Set("focus", true)
+			cl.qmlcell.ObjectByName("cellMouse").Call("selected")
+		}
+	})
 
 	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {
 
