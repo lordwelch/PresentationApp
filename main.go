@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+    "strings"
 
 	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
@@ -39,8 +40,8 @@ var (
 	err                          error
 	monitors                     []*glfw.Monitor
 	projMonitor                  *glfw.Monitor
-	tex1              *uint32
-	texDel, quickEdit Bool = false, false
+	tex1                         *uint32
+	texDel, quickEdit            Bool = false, false
 )
 
 func main() {
@@ -300,7 +301,8 @@ func (cl *cell) setSignal() {
 	cl.qmlcell.ObjectByName("cellMouse").On("clicked", func(musEvent qml.Object) {
 		btn := musEvent.Property("button")
 		if btn == 2 {
-			//cl.qmlcell.ObjectByName("cellMouse").Call("rightClicked")
+			window.ObjectByName("mnuCtx").Call("popup")
+			rhtClkCell = cl.index
 		} else {
 			selSlide = cl.qmlcell.Int("index")
 			cl.qmlcell.ObjectByName("cellMouse").Set("focus", true)
@@ -317,20 +319,16 @@ func (cl *cell) setSignal() {
 		}
 	})
 
-	window.ObjectByName("mnuImgPick").On("triggered", func() {
-		url := window.Call("openFileDialog")
-		slides[rhtClkCell].img.Clear
-		slides[rhtClkCell].img.ReadImage(url)
-	})
+	window.ObjectByName("imgpicker").On("accepted", func() {
+		//url := window.Call("getFileDialogUrl")
+        url := filepath.Clean(strings.Replace(window.ObjectByName("imgpicker").String("fileUrl"), "file:","",1))
 
-	cl.qmlcell.ObjectByName("cellMouse").On("clicked", func(mouse qml.Object) {
-		if mouse.Property("button") == 2 {
-			window.ObjectByName("mnuCtx").Call("popup")
-			rhtell = cl.index
-		} else {
-			cl.qmlcell.ObjectByName("cellMouse").Set("focus", true)
-			cl.qmlcell.ObjectByName("cellMouse").Call("selected")
-		}
+			slides[rhtClkCell].img.Clear()
+			slides[rhtClkCell].img.ReadImage(url)
+			fmt.Println(url)
+			setupScene()
+
+		fmt.Println(window.ObjectByName("imgpicker").String("fileUrl"))
 	})
 
 	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {

@@ -16,10 +16,9 @@ ApplicationWindow {
     height: 600
     property bool cls: false
 
-    function openFileDialog() {
-        imgpicker.open()
-        return imgpicker.fileUrl
-    }
+    /*function getFileDialogUrl() {
+        return
+    }*/
 
     onClosing: if (!cls) {
                    close.accepted = false
@@ -28,7 +27,7 @@ ApplicationWindow {
     FileDialog {
         id: imgpicker
         title: "Choose an image for this slide"
-        folder: shortcuts.pictures
+        objectName: "imgpicker"
     }
 
     AboutDialog {
@@ -44,8 +43,6 @@ ApplicationWindow {
     menuBar: MenuBar {
         Menu {
             title: "&File"
-            MenuItem {
-            }
             MenuItem {
                 text: "Close"
                 shortcut: StandardKey.Quit
@@ -74,6 +71,7 @@ ApplicationWindow {
             MenuItem {
                 objectName: "mnuImgPick"
                 text: "new Image..."
+                onTriggered: imgpicker.open()
             }
         }
 
