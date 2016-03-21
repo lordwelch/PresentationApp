@@ -52,6 +52,14 @@ ApplicationWindow {
             }
         }
         Menu {
+            title: "&Edit"
+            MenuItem {
+                text: "quick edit"
+                objectName: "mnuEdit"
+            }
+        }
+
+        Menu {
             title: "&Help"
             MenuItem {
                 action: aboutAction

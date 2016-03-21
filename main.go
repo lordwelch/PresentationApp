@@ -16,6 +16,8 @@ import (
 	"gopkg.in/gographics/imagick.v2/imagick"
 )
 
+type Bool bool
+
 type cell struct {
 	text    string
 	img     *imagick.MagickWand
@@ -37,11 +39,12 @@ var (
 	err                          error
 	monitors                     []*glfw.Monitor
 	projMonitor                  *glfw.Monitor
-	tex1                         uint32
-	texDel                       = false
+	tex1              *uint32
+	texDel, quickEdit Bool = false, false
 )
 
 func main() {
+	selSlide = 0
 
 	if err = qml.Run(run); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -95,7 +98,7 @@ func setupScene() {
 
 	gl.ClearColor(0, 0, 0, 0)
 	if texDel {
-		gl.DeleteTextures(1, &tex1)
+		gl.DeleteTextures(1, tex1)
 	}
 	tex1 = newTexture(*slides[selSlide].getImage(x0, y0))
 
@@ -133,7 +136,7 @@ func drawSlide() {
 
 }
 
-func newTexture(rgba image.RGBA) uint32 {
+func newTexture(rgba image.RGBA) *uint32 {
 	var texture1 uint32
 	gl.Enable(gl.TEXTURE_2D)
 	gl.GenTextures(1, &texture1)
@@ -149,7 +152,7 @@ func newTexture(rgba image.RGBA) uint32 {
 		gl.UNSIGNED_BYTE,
 		gl.Ptr(rgba.Pix))
 
-	return texture1
+	return &texture1
 
 }
 
@@ -251,6 +254,10 @@ func setSignals() {
 
 	})
 
+	window.ObjectByName("mnuEdit").On("triggered", func() {
+		(&quickEdit).Toggle()
+	})
+
 	textEdit.ObjectByName("textEdit1").On("focusChanged", func(focus bool) {
 		var (
 			str string
@@ -290,9 +297,16 @@ func (cl cell) getImage(x, y int) (img *image.RGBA) {
 }
 
 func (cl *cell) setSignal() {
-	cl.qmlcell.ObjectByName("cellMouse").On("clicked", func() {
-		cl.qmlcell.ObjectByName("cellMouse").Set("focus", true)
-		setupScene()
+	cl.qmlcell.ObjectByName("cellMouse").On("clicked", func(musEvent qml.Object) {
+		btn := musEvent.Property("button")
+		if btn == 2 {
+			//cl.qmlcell.ObjectByName("cellMouse").Call("rightClicked")
+		} else {
+			selSlide = cl.qmlcell.Int("index")
+			cl.qmlcell.ObjectByName("cellMouse").Set("focus", true)
+			cl.img.FlipImage()
+			setupScene()
+		}
 	})
 
 	cl.qmlcell.ObjectByName("cellMouse").On("focusChanged", func(focus bool) {
@@ -320,18 +334,19 @@ func (cl *cell) setSignal() {
 	})
 
 	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {
+		if quickEdit {
+			textEdit.Set("cell", cl.index)
+			textEdit.Set("x", cl.qmlcell.Int("x"))
+			textEdit.Set("y", cl.qmlcell.Int("y"))
+			textEdit.Set("height", cl.qmlcell.Int("height"))
+			textEdit.Set("z", 100)
+			textEdit.Set("opacity", 100)
+			textEdit.Set("visible", true)
+			textEdit.ObjectByName("textEdit1").Set("focus", true)
+			textEdit.Set("enabled", true)
 
-		textEdit.Set("cell", cl.index)
-		textEdit.Set("x", cl.qmlcell.Int("x"))
-		textEdit.Set("y", cl.qmlcell.Int("y"))
-		textEdit.Set("height", cl.qmlcell.Int("height"))
-		textEdit.Set("z", 100)
-		textEdit.Set("opacity", 100)
-		textEdit.Set("visible", true)
-		textEdit.ObjectByName("textEdit1").Set("focus", true)
-		textEdit.Set("enabled", true)
-
-		textEdit.ObjectByName("textEdit1").Set("text", cl.text)
+			textEdit.ObjectByName("textEdit1").Set("text", cl.text)
+		}
 	})
 
 }
@@ -375,6 +390,14 @@ func (cl *cell) remove() {
 
 func (sl *slide) remove(i int) {
 	*sl, (*sl)[len((*sl))-1] = append((*sl)[:i], (*sl)[i+1:]...), nil
+}
+
+func (bl *Bool) Toggle() {
+	if *bl == false {
+		*bl = true
+	} else {
+		*bl = false
+	}
 }
 
 func (cl cell) String() string {
