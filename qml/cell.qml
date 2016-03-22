@@ -30,26 +30,32 @@ Rectangle {
             anchors.fill: parent
             acceptedButtons: Qt.AllButtons
 
-            onMouseXChanged: if (containsMouse) {
-                                 parent.parent.border.color = "skyblue"
-                                 parent.parent.color = "darkblue"
-                                 parent.color = "white"
-                             } else if (focus) {
-                                 parent.color = "black"
-                             }
-
+            onMouseXChanged: cellHover()
             onExited: focusChanged(focus)
+
+            function cellHover() {
+                if (containsMouse) {
+                    parent.parent.border.color = "skyblue"
+                    parent.parent.color = "darkblue"
+                    parent.color = "white"
+                } else if (focus) {
+                    parent.color = "black"
+                }
+            }
 
             function notSelected() {
 
                 parent.parent.border.color = "black"
                 parent.parent.color = "white"
                 parent.color = "black"
+                cellHover()
             }
 
             function selected() {
                 parent.parent.border.color = "blue"
+                parent.color = "black"
                 parent.parent.color = "gainsboro"
+                cellHover()
             }
         }
     }

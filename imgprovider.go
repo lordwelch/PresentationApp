@@ -4,13 +4,16 @@ package main
 import (
 	"image"
 	"strconv"
+	"strings"
 )
 
 var imgready = false
 
 func imgProvider(id string, width, height int) image.Image {
-	if imgready {
-		i, _ := strconv.Atoi(id)
+	if imgready && (len(id) > 0) {
+		//fmt.Println("source (provider): ", id)
+		i1 := strings.Index(id, `;`)
+		i, _ := strconv.Atoi(id[:i1])
 		return slides[i].getImage(width, height)
 
 	} else {

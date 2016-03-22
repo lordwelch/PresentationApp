@@ -8,7 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
-    "strings"
+	"strings"
+
+	"strconv"
 
 	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
@@ -306,9 +308,9 @@ func (cl *cell) setSignal() {
 		} else {
 			selSlide = cl.qmlcell.Int("index")
 			cl.qmlcell.ObjectByName("cellMouse").Set("focus", true)
-			cl.img.FlipImage()
 			setupScene()
 		}
+		cl.clearcache()
 	})
 
 	cl.qmlcell.ObjectByName("cellMouse").On("focusChanged", func(focus bool) {
@@ -321,14 +323,12 @@ func (cl *cell) setSignal() {
 
 	window.ObjectByName("imgpicker").On("accepted", func() {
 		//url := window.Call("getFileDialogUrl")
-        url := filepath.Clean(strings.Replace(window.ObjectByName("imgpicker").String("fileUrl"), "file:","",1))
+		url := filepath.Clean(strings.Replace(window.ObjectByName("imgpicker").String("fileUrl"), "file:", "", 1))
 
-			slides[rhtClkCell].img.Clear()
-			slides[rhtClkCell].img.ReadImage(url)
-			fmt.Println(url)
-			setupScene()
-
-		fmt.Println(window.ObjectByName("imgpicker").String("fileUrl"))
+		slides[rhtClkCell].img.Clear()
+		slides[rhtClkCell].img.ReadImage(url)
+		setupScene()
+		cl.clearcache()
 	})
 
 	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {
@@ -347,6 +347,18 @@ func (cl *cell) setSignal() {
 		}
 	})
 
+}
+
+func (cl *cell) clearcache() {
+	str := cl.qmlimg.String("source")
+	//fmt.Println("source (click): ", str)
+	i := strings.Index(str, `;`)
+	str1 := str[:i]
+	//fmt.Println("ext (click): ", str1)
+	i1, _ := strconv.Atoi(str[i+1:])
+	str = str1 + `;` + strconv.Itoa(i1+1)
+	//fmt.Println("new source (click): ", str)
+	cl.qmlimg.Set("source", str)
 }
 
 func (sl *slide) addCell( /*cl *cell*/ ) {
@@ -368,8 +380,11 @@ func (sl *slide) addCell( /*cl *cell*/ ) {
 	cl.setSignal()
 
 	cl.qmlimg = qimg.Create(nil)
+	fmt.Println("index", cl.index)
+	fmt.Printf("objectName: %s\n", fmt.Sprintf("cellImg%d", cl.index))
 	cl.qmlimg.Set("objectName", fmt.Sprintf("cellImg%d", cl.index))
-	cl.qmlimg.Set("source", fmt.Sprintf("image://images/%d", cl.index))
+	cl.qmlimg.Set("source", fmt.Sprintf("image://images/%d"+`;`+"0", cl.index))
+	fmt.Println("source: ", cl.qmlimg.String("source"))
 	cl.qmlimg.Set("parent", window.ObjectByName("data2"))
 	cl.qmlimg.Set("index", cl.index)
 
