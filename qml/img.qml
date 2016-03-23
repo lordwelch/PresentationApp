@@ -11,6 +11,5 @@ Image {
     fillMode: Image.PreserveAspectFit
     anchors.right: parent.right
     anchors.left: parent.left
-
-
+    //cache: false
 }
