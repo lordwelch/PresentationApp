@@ -86,8 +86,10 @@ func run() error {
 
 	textEdit = window.ObjectByName("textEdit")
 	slides.addCell()
+
 	//signals for whole qml
 	setSignals()
+
 	//image is ready for imageprovider
 	imgready = true
 
