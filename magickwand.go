@@ -12,7 +12,6 @@ func resizeImage(mw *imagick.MagickWand, newWidth, newHeight int, keepSpecSize, 
 		width, height, origHeight, origWidth int
 	)
 	origHeight = int(mw.GetImageHeight())
-	//fmt.Println("hahahahahah :-P")
 	origWidth = int(mw.GetImageWidth())
 
 	if (origHeight != newHeight) || (origWidth != newWidth) {

@@ -8,9 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
-	"strings"
-
 	"strconv"
+	"strings"
 
 	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
@@ -19,6 +18,7 @@ import (
 	"gopkg.in/gographics/imagick.v2/imagick"
 )
 
+//lazy wanted a toggle function
 type Bool bool
 
 type cell struct {
@@ -31,23 +31,24 @@ type cell struct {
 type slide []*cell
 
 var (
-	x0, y0, selSlide, rhtClkCell int
-	path                         string
-	qimg                         qml.Object
-	textEdit                     qml.Object
-	cellQml                      qml.Object
-	window                       *qml.Window
-	win                          *glfw.Window
-	slides                       slide
-	err                          error
-	monitors                     []*glfw.Monitor
-	projMonitor                  *glfw.Monitor
-	tex1                         *uint32
-	texDel, quickEdit            Bool = false, false
+	//displayed width/height the focused and the cell that was last right clicked
+	monWidth, monHeight, selCell, rhtClkCell int
+	path                                     string
+	qimg                                     qml.Object //file for the image object
+	textEdit                                 qml.Object
+	cellQml                                  qml.Object   //file for the cell object
+	window                                   *qml.Window  //QML
+	win                                      *glfw.Window //GLFW
+	slides                                   slide
+	err                                      error
+	monitors                                 []*glfw.Monitor
+	projMonitor                              *glfw.Monitor
+	tex1                                     *uint32                //identifier for opengl texture
+	texDel, quickEdit                        Bool    = false, false //if texture should be deleted
 )
 
 func main() {
-	selSlide = 0
+	selCell = 0
 
 	if err = qml.Run(run); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -62,7 +63,7 @@ func run() error {
 
 	engine := qml.NewEngine()
 	engine.AddImageProvider("images", imgProvider)
-
+	//path for qml files TODO: change to somewhere else
 	path, err = osext.ExecutableFolder()
 	path = filepath.Clean(path + "/../src/github.com/lordwelch/PresentationApp/")
 
@@ -85,7 +86,9 @@ func run() error {
 
 	textEdit = window.ObjectByName("textEdit")
 	slides.addCell()
+	//signals for whole qml
 	setSignals()
+	//image is ready for imageprovider
 	imgready = true
 
 	window.Show()
@@ -103,7 +106,7 @@ func setupScene() {
 	if texDel {
 		gl.DeleteTextures(1, tex1)
 	}
-	tex1 = newTexture(*slides[selSlide].getImage(x0, y0))
+	tex1 = newTexture(*slides[selCell].getImage(monWidth, monHeight))
 
 	gl.MatrixMode(gl.PROJECTION)
 	gl.LoadIdentity()
@@ -123,15 +126,18 @@ func drawSlide() {
 
 	gl.Begin(gl.QUADS)
 
+	//top left
 	gl.TexCoord2f(0, 0)
 	gl.Vertex3f(-1, 1, 0)
-
+	//top right
 	gl.TexCoord2f(1, 0)
 	gl.Vertex3f(1, 1, 0)
 
+	//bottom right
 	gl.TexCoord2f(1, 1)
 	gl.Vertex3f(1, -1, 0)
 
+	//bottom left
 	gl.TexCoord2f(0, 1)
 	gl.Vertex3f(-1, -1, 0)
 
@@ -168,22 +174,22 @@ func checkMon() {
 
 	if i := len(monitors); i < 2 {
 		fmt.Println("You only have 1 monitor!!!!!!!!!!! :-P")
-		x0 = 800
-		y0 = 600
+		monWidth = 800
+		monHeight = 600
 
-		win, err = glfw.CreateWindow(x0, y0, "Cube", nil, nil)
+		win, err = glfw.CreateWindow(monWidth, monHeight, "Cube", nil, nil)
 		if err != nil {
 			panic(err)
 		}
 		projMonitor = monitors[0]
 	} else {
 		fmt.Printf("You have %d monitors\n", i)
-		x0 = monitors[1].GetVideoMode().Width
-		y0 = monitors[1].GetVideoMode().Height
-		win, err = glfw.CreateWindow(x0, y0, "Cube", nil, nil)
+		monWidth = monitors[1].GetVideoMode().Width
+		monHeight = monitors[1].GetVideoMode().Height
+		win, err = glfw.CreateWindow(monWidth, monHeight, "Cube", nil, nil)
 		fmt.Println(win.GetPos())
 		win.SetPos(monitors[1].GetPos())
-		fmt.Println(x0, y0)
+		fmt.Println(monWidth, monHeight)
 		if err != nil {
 			panic(err)
 		}
@@ -236,7 +242,20 @@ func glInit() {
 	}
 }
 
+//setSignals() for non dynamic elements
 func setSignals() {
+	window.ObjectByName("imgpicker").On("accepted", func() {
+		//delete file://  from url
+		url := filepath.Clean(strings.Replace(window.ObjectByName("imgpicker").String("fileUrl"), "file:", "", 1))
+
+		//replace new image
+		slides[rhtClkCell].img.Clear()
+		slides[rhtClkCell].img.ReadImage(url)
+		setupScene()
+		//update image preview
+		slides[rhtClkCell].clearcache()
+	})
+
 	window.ObjectByName("btnAdd").On("clicked", func() {
 		slides.addCell()
 	})
@@ -246,10 +265,12 @@ func setSignals() {
 	})
 
 	window.ObjectByName("btnMem").On("clicked", func() {
+		//run GC
 		debug.FreeOSMemory()
 	})
 
 	window.On("closing", func() {
+		//close glfw first
 		if false == window.Property("cls") {
 			win.SetShouldClose(true)
 			window.Set("cls", true)
@@ -268,7 +289,7 @@ func setSignals() {
 		)
 
 		if !focus {
-
+			//set text back to the cell
 			str = textEdit.ObjectByName("textEdit1").String("text")
 			cel = slides[textEdit.Int("cell")]
 			if textEdit.Bool("txt") {
@@ -280,36 +301,43 @@ func setSignals() {
 
 }
 
-func (cl cell) getImage(x, y int) (img *image.RGBA) {
+//getImage() from imagick to image.RGBA
+func (cl cell) getImage(width, height int) (img *image.RGBA) {
 	mw := cl.img.GetImage()
-	if (x == 0) || (y == 0) {
-		x = int(mw.GetImageWidth())
-		y = int(mw.GetImageHeight())
+	if (width == 0) || (height == 0) {
+		width = int(mw.GetImageWidth())
+		height = int(mw.GetImageHeight())
 	}
 
-	mw = resizeImage(mw, x, y, true, true)
-	img = image.NewRGBA(image.Rect(0, 0, int(x), int(y)))
+	mw = resizeImage(mw, width, height, true, true)
+	img = image.NewRGBA(image.Rect(0, 0, int(width), int(height)))
 	if img.Stride != img.Rect.Size().X*4 {
 		panic("unsupported stride")
 	}
 
-	Tpix, _ := mw.ExportImagePixels(0, 0, uint(x), uint(y), "RGBA", imagick.PIXEL_CHAR)
+	Tpix, _ := mw.ExportImagePixels(0, 0, uint(width), uint(height), "RGBA", imagick.PIXEL_CHAR)
 	img.Pix = Tpix.([]uint8)
 	mw.Destroy()
 	return
 }
 
+//signals for the cell and image in qml
 func (cl *cell) setSignal() {
 	cl.qmlcell.ObjectByName("cellMouse").On("clicked", func(musEvent qml.Object) {
 		btn := musEvent.Property("button")
+		//right click
 		if btn == 2 {
+			//context menu
 			window.ObjectByName("mnuCtx").Call("popup")
 			rhtClkCell = cl.index
 		} else {
-			selSlide = cl.qmlcell.Int("index")
+			//left click
+			//select and update image preview for cell
+			selCell = cl.qmlcell.Int("index")
 			cl.qmlcell.ObjectByName("cellMouse").Set("focus", true)
 			setupScene()
 		}
+		//update image preview
 		cl.clearcache()
 	})
 
@@ -321,34 +349,27 @@ func (cl *cell) setSignal() {
 		}
 	})
 
-	window.ObjectByName("imgpicker").On("accepted", func() {
-		//url := window.Call("getFileDialogUrl")
-		url := filepath.Clean(strings.Replace(window.ObjectByName("imgpicker").String("fileUrl"), "file:", "", 1))
-
-		slides[rhtClkCell].img.Clear()
-		slides[rhtClkCell].img.ReadImage(url)
-		setupScene()
-		cl.clearcache()
-	})
-
 	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {
 		if quickEdit {
+			//cover the cell with the text edit
 			textEdit.Set("cell", cl.index)
 			textEdit.Set("x", cl.qmlcell.Int("x"))
 			textEdit.Set("y", cl.qmlcell.Int("y"))
 			textEdit.Set("height", cl.qmlcell.Int("height"))
 			textEdit.Set("z", 100)
-			textEdit.Set("opacity", 100)
 			textEdit.Set("visible", true)
 			textEdit.ObjectByName("textEdit1").Set("focus", true)
 			textEdit.Set("enabled", true)
 
+			//set the text
 			textEdit.ObjectByName("textEdit1").Set("text", cl.text)
 		}
 	})
 
 }
 
+//clear cache dosen't actually clear the cache
+//just gives a new source so that the cache isn't used
 func (cl *cell) clearcache() {
 	str := cl.qmlimg.String("source")
 	//fmt.Println("source (click): ", str)
@@ -361,24 +382,32 @@ func (cl *cell) clearcache() {
 	cl.qmlimg.Set("source", str)
 }
 
+//Adds a new cell
 func (sl *slide) addCell( /*cl *cell*/ ) {
 	var cl cell
-
+	//gets the length so that the index is valid
 	cl.index = len(*sl)
+
+	//increase count on parent QML element
 	window.ObjectByName("gridRect").Set("count", window.ObjectByName("gridRect").Int("count")+1)
 	cl.qmlcell = cellQml.Create(nil)
 	cl.qmlcell.Set("objectName", fmt.Sprintf("cellRect%d", len(*sl)))
 	cl.qmlcell.Set("parent", window.ObjectByName("data1"))
 	cl.qmlcell.Set("index", cl.index)
 
+	//load image
 	cl.img = imagick.NewMagickWand()
 	cl.img.ReadImage("logo:")
 
-	cl.text = "testing 1... 2... 3..."
+	//give QML the text
 	cl.qmlcell.ObjectByName("cellText").Set("text", cl.text)
+
+	//keep the pointer/dereference (i'm not sure which it is)
+	//problems occur otherwise
 	*sl = append(*sl, &cl)
 	cl.setSignal()
 
+	//seperate image object in QML
 	cl.qmlimg = qimg.Create(nil)
 	fmt.Println("index", cl.index)
 	fmt.Printf("objectName: %s\n", fmt.Sprintf("cellImg%d", cl.index))
@@ -390,6 +419,7 @@ func (sl *slide) addCell( /*cl *cell*/ ) {
 
 }
 
+//remove() should destroy everything
 func (cl *cell) remove() {
 	cl.text = ""
 	cl.qmlimg.Destroy()
@@ -401,10 +431,12 @@ func (cl *cell) remove() {
 
 }
 
+//(slide) remove copied from gist on github
 func (sl *slide) remove(i int) {
 	*sl, (*sl)[len((*sl))-1] = append((*sl)[:i], (*sl)[i+1:]...), nil
 }
 
+//lazy wanted a toggle func
 func (bl *Bool) Toggle() {
 	if *bl == false {
 		*bl = true
@@ -413,6 +445,7 @@ func (bl *Bool) Toggle() {
 	}
 }
 
+//not really needed
 func (cl cell) String() string {
 	return fmt.Sprintf("Index: %d \nText:  %s\n", cl.index, cl.text)
 }

@@ -1,3 +1,5 @@
+package main
+
 type _ struct {
 	Song struct {
 		Version      string `xml:"version,attr"`
@@ -45,14 +47,13 @@ type _ struct {
 
 		Verse []struct {
 			Lang            string `xml:"lang,attr,omitempty"`
-			transliteration string `xml:"translit,attr,omitempty"`
+			Transliteration string `xml:"translit,attr,omitempty"`
 			Name            string `xml:"name,attr"`
 			Lines           []struct {
-				Part  string `xml"part,attr"`
+				Part  string `xml:"part,attr"`
 				Value string `xml:",innerxml"`
 			} `xml:"lines"`
 			Comments []string `xml:"comments,omitempty"`
 		} `xml:"lyrics>verse"`
 	} `xml:"song"`
 }
-
