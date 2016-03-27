@@ -57,6 +57,15 @@ ApplicationWindow {
         }
 
         Menu {
+            title: "Window"
+
+            MenuItem {
+                text: "Display"
+                objectName: "mnuDisplay"
+            }
+        }
+
+        Menu {
             title: "&Help"
             MenuItem {
                 action: aboutAction
