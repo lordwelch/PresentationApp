@@ -148,15 +148,15 @@ func glInit() {
 
 	qml.Func1 = func() int {
 		if !win.ShouldClose() {
-			glfw.PollEvents()
+			//glfw.PollEvents()
 			drawSlide()
 			win.SwapBuffers()
 			return 0
 
 		}
 		win.Hide()
-		win.Destroy()
-		glfw.Terminate()
+		//win.Destroy()
+		//glfw.Terminate()
 		return 1
 
 	}

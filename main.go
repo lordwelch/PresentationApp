@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/kardianos/osext"
+	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/lordwelch/qml"
 	"gopkg.in/gographics/imagick.v2/imagick"
 )
@@ -35,6 +36,9 @@ func main() {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
+    win.Destroy()
+    glfw.PollEvents()
+    glfw.Terminate()
 
 }
 
