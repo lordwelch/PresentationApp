@@ -43,6 +43,23 @@ func (cl *cell) setSignal() {
 		cl.clearcache()
 	})
 
+	cl.qmlimg.ObjectByName("cellMouse").On("clicked", func(musEvent qml.Object) {
+		btn := musEvent.Property("button")
+		//right click
+		if btn == 2 {
+			//context menu
+			window.ObjectByName("mnuCtx").Call("popup")
+			rhtClkCell = cl.index
+		} else {
+			//left click
+			//select and update image preview for cell
+			selCell = cl.qmlcell.Int("index")
+			cl.qmlcell.ObjectByName("cellMouse").Set("focus", true)
+			setupScene()
+		}
+		//update image preview
+		cl.clearcache()
+	})
 	cl.qmlcell.ObjectByName("cellMouse").On("focusChanged", func(focus bool) {
 		if focus {
 			cl.qmlcell.ObjectByName("cellMouse").Call("selected")
@@ -107,7 +124,10 @@ func setSignals() {
 	})
 
 	window.ObjectByName("mnuDisplay").On("triggered", func() {
-		qml.RunMain(glInit)
+		win.SetShouldClose(false)
+		window.Set("cls", false)
+		win.Show()
+		qml.ResetGLFW()
 	})
 
 	window.ObjectByName("mnuEdit").On("triggered", func() {

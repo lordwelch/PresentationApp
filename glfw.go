@@ -109,7 +109,7 @@ func checkMon() {
 		monHeight = monitors[1].GetVideoMode().Height
 		win, err = glfw.CreateWindow(monWidth, monHeight, "Cube", nil, nil)
 		win.SetPos(monitors[1].GetPos())
-		fmt.Printf("Width: %d  Height: %d \n",monWidth, monHeight)
+		fmt.Printf("Width: %d  Height: %d \n", monWidth, monHeight)
 		if err != nil {
 			panic(err)
 		}

@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/kardianos/osext"
 	"github.com/go-gl/glfw/v3.1/glfw"
+	"github.com/kardianos/osext"
 	"github.com/lordwelch/qml"
 	"gopkg.in/gographics/imagick.v2/imagick"
 )
@@ -36,9 +36,9 @@ func main() {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
-    win.Destroy()
-    glfw.PollEvents()
-    glfw.Terminate()
+	win.Destroy()
+	glfw.PollEvents()
+	glfw.Terminate()
 
 }
 
@@ -109,7 +109,6 @@ func (sl *slide) add( /*cl *cell*/ ) {
 	//keep the pointer/dereference (i'm not sure which it is)
 	//problems occur otherwise
 	*sl = append(*sl, &cl)
-	cl.setSignal()
 
 	//seperate image object in QML
 	cl.qmlimg = qimg.Create(nil)
@@ -117,6 +116,7 @@ func (sl *slide) add( /*cl *cell*/ ) {
 	cl.qmlimg.Set("source", fmt.Sprintf("image://images/%d"+`;`+"0", cl.index))
 	cl.qmlimg.Set("parent", window.ObjectByName("data2"))
 	cl.qmlimg.Set("index", cl.index)
+	cl.setSignal()
 
 }
 

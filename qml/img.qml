@@ -12,4 +12,12 @@ Image {
     anchors.right: parent.right
     anchors.left: parent.left
     //cache: false
+    MouseArea {
+            id: cellMouse
+            hoverEnabled: true
+            enabled: true
+            objectName: "cellMouse"
+            anchors.fill: parent
+            acceptedButtons: Qt.AllButtons
+            }
 }
