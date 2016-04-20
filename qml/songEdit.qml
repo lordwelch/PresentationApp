@@ -39,13 +39,31 @@ ApplicationWindow {
             }
         }
     }
-
+    GroupBox {
+        anchors.top: parent
+        anchors.bottom: textArea
+        ComboBox {
+            id: verseSelector
+            model: ["V1", "V2"]
+            anchors.left: parent
+            anchors.right: imageSelector
+            anchors.top: parent
+            anchors.bottom: parent
+        }
+        ComboBox {
+            id: imageSelector
+            anchors.left: verseSelector
+            anchors.right: parent
+            anchors.top: parent
+            anchors.bottom: parent
+        }
+    }
     SplitView {
+
         ListView {
-            width: 180; height: 200
+            width: 180
+            height: 200
             boundsBehavior: Flickable.StopAtBounds
-
-
 
             model: ListModel {
                 ListElement {
@@ -63,45 +81,49 @@ ApplicationWindow {
                 ListElement {
                     name: "v5"
                 }
-                ListElement {
-                    name: "v6"
-                }
-                ListElement {
-                    name: "v7"
-                }
-                ListElement {
-                    name: "v8"
-                }
-                ListElement {
-                    name: "v9"
-                }
-                ListElement {
-                    name: "v10"
-                }
-                ListElement {
-                    name: "v11"
-                }
-                ListElement {
-                    name: "v12"
-                }
-                ListElement {
-                    name: "v13"
-                }
-                ListElement {
-                    name: "v14"
-                }
-                ListElement {
-                    name: "v15"
-                }
             }
             delegate: Component {
                 id: contactsDelegate
-                    Text {
-                        id: contactInfo
-                        text: name
-                    }
+                Text {
+                    id: contactInfo
+                    text: name
+                }
+            }
+            focus: true
+        }
+        ListView {
+            width: 180
+            height: 200
+            boundsBehavior: Flickable.StopAtBounds
+
+            model: ListModel {
+                ListElement {
+                    name: "v1"
+                }
+                ListElement {
+                    name: "v2"
+                }
+                ListElement {
+                    name: "v3"
+                }
+                ListElement {
+                    name: "v4"
+                }
+                ListElement {
+                    name: "v5"
+                }
+            }
+            delegate: Component {
+                id: contactsDelegate1
+                Text {
+                    id: contactInfo
+                    text: name
+                }
             }
             focus: true
         }
     }
+    TextArea {
+            id: textArea
+                }
 }
