@@ -3,6 +3,7 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"os"
 	"path/filepath"
 
@@ -21,6 +22,13 @@ type cell struct {
 	qmlimg  qml.Object
 	qmlcell qml.Object
 	index   int
+	font    struct {
+		name         string
+		size         int
+		color        color.RGBA
+		outline      float32
+		outlineColor color.RGBA
+	}
 }
 type slide []*cell
 
@@ -56,7 +64,7 @@ func run() error {
 		return err
 	}
 
-	edtQml, err = engine.LoadFile(path + "/qml/tst.qml")
+	edtQml, err = engine.LoadFile(path + "/qml/songEdit.qml")
 	if err != nil {
 		return err
 	}
@@ -127,7 +135,7 @@ func (sl *slide) add( /*cl *cell*/ ) {
 
 }
 
-//(cell) remove() should destroy everything
+//(cell) remove() should destroy everything for this cell
 func (cl *cell) remove() {
 	cl.text = ""
 	cl.qmlimg.Destroy()
@@ -144,7 +152,7 @@ func (sl *slide) remove(i int) {
 	*sl, (*sl)[len((*sl))-1] = append((*sl)[:i], (*sl)[i+1:]...), nil
 }
 
-//Toggle lazy wanted a func for it
+//Toggle, lazy wanted a func for it
 func (bl *Bool) Toggle() {
 	if *bl == false {
 		*bl = true

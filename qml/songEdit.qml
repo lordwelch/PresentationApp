@@ -7,6 +7,20 @@ ApplicationWindow {
     minimumHeight: 480
     minimumWidth: 640
 
+    ColorDialog {
+        id: textClrDialog
+        //objectname: "textClrDialog"
+        title: "Please choose a color for the text"
+        showAlphaChannel: true
+    }
+
+    ColorDialog {
+        id: outlineClrDialog
+        //objectname: "outlineClrDialog"
+        title: "Please choose a color for the text"
+        showAlphaChannel: true
+    }
+
     menuBar: MenuBar {
         Menu {
             title: "&File"
@@ -34,7 +48,7 @@ ApplicationWindow {
         Menu {
             title: "&Help"
             MenuItem {
-                action: aboutAction
+                //action: aboutAction
             }
         }
     }
@@ -233,17 +247,18 @@ ApplicationWindow {
                     objectName: "imgPicker"
                 }
             }
-            TextEdit {
+            TextArea {
                 id: textEdit1
                 width: 80
                 height: 20
                 text: qsTr("Text Edit")
                 textFormat: Text.AutoText
-                cursorVisible: true
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 font.pixelSize: 12
+                selectByKeyboard: true
+                selectByMouse: true
             }
         }
     }

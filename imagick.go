@@ -2,6 +2,7 @@
 package main
 
 import (
+	"strings"
 	"bytes"
 	"image"
 	"log"
@@ -69,7 +70,7 @@ func resizeImage(mw *imagick.MagickWand, newWidth, newHeight int, keepSpecSize, 
 }
 
 //getImage() from imagick to image.RGBA
-func (cl cell) getImage(width, height int) (img *image.RGBA) {
+func (cl *cell) getImage(width, height int) (img *image.RGBA) {
 	mw := cl.img.GetImage()
 	if (width == 0) || (height == 0) {
 		width = int(mw.GetImageWidth())
@@ -88,10 +89,8 @@ func (cl cell) getImage(width, height int) (img *image.RGBA) {
 	return
 }
 
-// Text effect 1 - shadow effect using MagickShadowImage
-func textEffect1() {
-	imagick.Initialize()
-	defer imagick.Terminate()
+// adding text to image copied from example
+func (cl *cell) imgtext() {
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 	dw := imagick.NewDrawingWand()
@@ -117,7 +116,7 @@ func textEffect1() {
 	dw.SetTextAntialias(true)
 
 	// Now draw the text
-	dw.Annotation(25, 65, "Magick")
+	dw.Annotation(25, 65, cl.text)
 
 	// Draw the image on to the mw
 	mw.DrawImage(dw)
@@ -155,7 +154,7 @@ func findfonts() {
 	if err != nil {
 		log.Print(err)
 	}
-	fontlst = strings.Seperate(out.String(), "\n")
+	fontlst = strings.Split(out.String(), "\n")
 }
 
 func round(a float64) int {
