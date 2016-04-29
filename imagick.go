@@ -2,10 +2,17 @@
 package main
 
 import (
+	"bytes"
 	"image"
-	. "math"
+	"log"
+	"math"
+	"os/exec"
 
 	"gopkg.in/gographics/imagick.v2/imagick"
+)
+
+var (
+	fontlst []string
 )
 
 /*resizeImage() mw fullsize image
@@ -81,9 +88,79 @@ func (cl cell) getImage(width, height int) (img *image.RGBA) {
 	return
 }
 
+// Text effect 1 - shadow effect using MagickShadowImage
+func textEffect1() {
+	imagick.Initialize()
+	defer imagick.Terminate()
+	mw := imagick.NewMagickWand()
+	defer mw.Destroy()
+	dw := imagick.NewDrawingWand()
+	defer dw.Destroy()
+	pw := imagick.NewPixelWand()
+	defer pw.Destroy()
+	pw.SetColor("none")
+
+	// Create a new transparent image
+	mw.NewImage(0, 0, pw)
+
+	// Set up a 72 point white font
+	pw.SetColor("white")
+	dw.SetFillColor(pw)
+	dw.SetFont("Verdana-Bold-Italic")
+	dw.SetFontSize(72)
+
+	// Add a black outline to the text
+	pw.SetColor("black")
+	dw.SetStrokeColor(pw)
+
+	// Turn antialias on - not sure this makes a difference
+	dw.SetTextAntialias(true)
+
+	// Now draw the text
+	dw.Annotation(25, 65, "Magick")
+
+	// Draw the image on to the mw
+	mw.DrawImage(dw)
+
+	// Trim the image down to include only the text
+	mw.TrimImage(0)
+
+	// equivalent to the command line +repage
+	mw.ResetImagePage("")
+
+	// Make a copy of the text image
+	cw := mw.Clone()
+
+	// Set the background colour to blue for the shadow
+	pw.SetColor("blue")
+	mw.SetImageBackgroundColor(pw)
+
+	// Opacity is a real number indicating (apparently) percentage
+	mw.ShadowImage(70, 4, 5, 5)
+
+	// Composite the text on top of the shadow
+	mw.CompositeImage(cw, imagick.COMPOSITE_OP_OVER, 5, 5)
+	cw.Destroy()
+
+	// and write the result
+	mw.WriteImage("text_shadow.png")
+}
+
+func findfonts() {
+	cmd := exec.Command("grep", "-ivE", `\-Oblique$|-Bold$|-Italic$|-Light$`)
+	cmd.Stdin = strings.NewReader(strings.Join(imagick.QueryFonts("*"), "\n"))
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		log.Print(err)
+	}
+	fontlst = strings.Seperate(out.String(), "\n")
+}
+
 func round(a float64) int {
 	if a < 0 {
-		return int(Ceil(a - 0.5))
+		return int(math.Ceil(a - 0.5))
 	}
-	return int(Floor(a + 0.5))
+	return int(math.Floor(a + 0.5))
 }

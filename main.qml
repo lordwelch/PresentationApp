@@ -26,7 +26,9 @@ ApplicationWindow {
 
     FileDialog {
         id: imgpicker
+        // @disable-check M16
         title: "Choose an image for this slide"
+        // @disable-check M16
         objectName: "imgpicker"
     }
 

@@ -17,8 +17,10 @@ var (
 	qimg       qml.Object //file for the image object
 	cellQml    qml.Object //file for the cell object
 	mainQml    qml.Object //main QML file
+	edtQml     qml.Object
 	textEdit   qml.Object
 	window     *qml.Window
+	engine     *qml.Engine
 	quickEdit  Bool = false
 	imgready   Bool = false
 )

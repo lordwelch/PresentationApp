@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"image"
 	"log"
-    "os"
 
 	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/lordwelch/qml"
-    "github.com/go-gl/gltext"
 )
 
 var (
@@ -21,17 +19,7 @@ var (
 	projMonitor *glfw.Monitor
 	tex1        *uint32 //identifier for opengl texture
 	texDel      Bool    //if texture should be deleted
-    flt *os.File
-    f *gltext.Font
 )
-
-func loadfont(){
-
-    flt,err = os.Open("Comfortaa-Regular.ttf")
-    if err != nil {
-        f, err = gltext.LoadTruetype(flt, 30, 32, 255, gltext.LeftToRight)
-    }
-}
 
 func setupScene() {
 
@@ -75,7 +63,6 @@ func drawSlide() {
 	gl.Vertex3f(-1, -1, 0)
 
 	gl.End()
-    f.Printf(5,10,"test")
 
 }
 
@@ -155,7 +142,6 @@ func glInit() {
 	if err := gl.Init(); err != nil {
 		panic(err)
 	}
-    loadfont()
 
 	win.SetPos(projMonitor.GetPos())
 	setupScene()

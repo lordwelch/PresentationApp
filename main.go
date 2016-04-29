@@ -45,13 +45,18 @@ func main() {
 func run() error {
 	imagick.Initialize()
 
-	engine := qml.NewEngine()
+	engine = qml.NewEngine()
 	engine.AddImageProvider("images", imgProvider)
 	//path for qml files TODO: change to somewhere else
 	path, err = osext.ExecutableFolder()
 	path = filepath.Clean(path + "/../src/github.com/lordwelch/PresentationApp/")
 
 	mainQml, err = engine.LoadFile(path + "/main.qml")
+	if err != nil {
+		return err
+	}
+
+	edtQml, err = engine.LoadFile(path + "/qml/tst.qml")
 	if err != nil {
 		return err
 	}
@@ -66,7 +71,8 @@ func run() error {
 		return err
 	}
 
-	window = mainQml.CreateWindow(nil)
+	window = mainQml.CreateWindow(engine.Context())
+	window2 := edtQml.CreateWindow(engine.Context())
 
 	textEdit = window.ObjectByName("textEdit")
 	//signals for whole qml
@@ -77,6 +83,7 @@ func run() error {
 	imgready = true
 
 	window.Show()
+	window2.Show()
 	slides[0].clearcache()
 	qml.RunMain(glInit)
 
@@ -94,7 +101,7 @@ func (sl *slide) add( /*cl *cell*/ ) {
 
 	//increase count on parent QML element
 	window.ObjectByName("gridRect").Set("count", window.ObjectByName("gridRect").Int("count")+1)
-	cl.qmlcell = cellQml.Create(nil)
+	cl.qmlcell = cellQml.Create(engine.Context())
 	cl.qmlcell.Set("objectName", fmt.Sprintf("cellRect%d", len(*sl)))
 	cl.qmlcell.Set("parent", window.ObjectByName("data1"))
 	cl.qmlcell.Set("index", cl.index)
@@ -111,7 +118,7 @@ func (sl *slide) add( /*cl *cell*/ ) {
 	*sl = append(*sl, &cl)
 
 	//seperate image object in QML
-	cl.qmlimg = qimg.Create(nil)
+	cl.qmlimg = qimg.Create(engine.Context())
 	cl.qmlimg.Set("objectName", fmt.Sprintf("cellImg%d", cl.index))
 	cl.qmlimg.Set("source", fmt.Sprintf("image://images/%d"+`;`+"0", cl.index))
 	cl.qmlimg.Set("parent", window.ObjectByName("data2"))
