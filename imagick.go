@@ -2,12 +2,13 @@
 package main
 
 import (
-	"strings"
 	"bytes"
 	"image"
+	"image/color"
 	"log"
 	"math"
 	"os/exec"
+	"strings"
 
 	"gopkg.in/gographics/imagick.v2/imagick"
 )
@@ -90,7 +91,7 @@ func (cl *cell) getImage(width, height int) (img *image.RGBA) {
 }
 
 // adding text to image copied from example
-func (cl *cell) imgtext() {
+func (cl *cell) imgtext(x, y int) {
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 	dw := imagick.NewDrawingWand()
@@ -103,13 +104,13 @@ func (cl *cell) imgtext() {
 	mw.NewImage(0, 0, pw)
 
 	// Set up a 72 point white font
-	pw.SetColor("white")
+	pw.SetColor(font.textColor)
 	dw.SetFillColor(pw)
-	dw.SetFont("Verdana-Bold-Italic")
-	dw.SetFontSize(72)
+	dw.SetFont(font.name)
+	dw.SetFontSize(font.size)
 
 	// Add a black outline to the text
-	pw.SetColor("black")
+	pw.SetColor(font.OutlineColor)
 	dw.SetStrokeColor(pw)
 
 	// Turn antialias on - not sure this makes a difference
@@ -131,7 +132,7 @@ func (cl *cell) imgtext() {
 	cw := mw.Clone()
 
 	// Set the background colour to blue for the shadow
-	pw.SetColor("blue")
+	pw.SetColor("black")
 	mw.SetImageBackgroundColor(pw)
 
 	// Opacity is a real number indicating (apparently) percentage
@@ -140,9 +141,6 @@ func (cl *cell) imgtext() {
 	// Composite the text on top of the shadow
 	mw.CompositeImage(cw, imagick.COMPOSITE_OP_OVER, 5, 5)
 	cw.Destroy()
-
-	// and write the result
-	mw.WriteImage("text_shadow.png")
 }
 
 func findfonts() {
