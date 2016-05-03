@@ -3,8 +3,8 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"image"
-	"image/color"
 	"log"
 	"math"
 	"os/exec"
@@ -79,6 +79,10 @@ func (cl *cell) getImage(width, height int) (img *image.RGBA) {
 	}
 
 	mw = resizeImage(mw, width, height, true, true)
+	mw1 := cl.imgtext(width, height)
+	mw.CompositeImage(mw1, imagick.COMPOSITE_OP_OVER, 0, 0)
+	mw1.Destroy()
+
 	img = image.NewRGBA(image.Rect(0, 0, int(width), int(height)))
 	if img.Stride != img.Rect.Size().X*4 {
 		panic("unsupported stride")
@@ -91,9 +95,9 @@ func (cl *cell) getImage(width, height int) (img *image.RGBA) {
 }
 
 // adding text to image copied from example
-func (cl *cell) imgtext(x, y int) {
+func (cl *cell) imgtext(width, height int) *imagick.MagickWand {
 	mw := imagick.NewMagickWand()
-	defer mw.Destroy()
+	//defer mw.Destroy()
 	dw := imagick.NewDrawingWand()
 	defer dw.Destroy()
 	pw := imagick.NewPixelWand()
@@ -101,29 +105,34 @@ func (cl *cell) imgtext(x, y int) {
 	pw.SetColor("none")
 
 	// Create a new transparent image
-	mw.NewImage(0, 0, pw)
+	mw.NewImage(uint(width), uint(height), pw)
 
 	// Set up a 72 point white font
-	pw.SetColor(font.textColor)
+	r, g, b, _ := cl.font.color.RGBA()
+	pw.SetColor(fmt.Sprintf("rgb(%d,%d,%d)", r, g, b))
 	dw.SetFillColor(pw)
-	dw.SetFont(font.name)
-	dw.SetFontSize(font.size)
+	dw.SetFont(cl.font.name)
+	dw.SetFontSize(cl.font.size)
 
+	otlne := "none"
 	// Add a black outline to the text
-	pw.SetColor(font.OutlineColor)
+	r, g, b, _ = cl.font.outlineColor.RGBA()
+	if cl.font.outline {
+		otlne = fmt.Sprintf("rgb(%d,%d,%d)", r, g, b)
+	}
+
+	pw.SetColor(otlne)
 	dw.SetStrokeColor(pw)
+	dw.SetStrokeWidth(cl.font.outlineSize)
 
 	// Turn antialias on - not sure this makes a difference
-	dw.SetTextAntialias(true)
+	//dw.SetTextAntialias(true)
 
 	// Now draw the text
-	dw.Annotation(25, 65, cl.text)
+	dw.Annotation(cl.font.x, cl.font.y, cl.text)
 
 	// Draw the image on to the mw
 	mw.DrawImage(dw)
-
-	// Trim the image down to include only the text
-	mw.TrimImage(0)
 
 	// equivalent to the command line +repage
 	mw.ResetImagePage("")
@@ -141,6 +150,7 @@ func (cl *cell) imgtext(x, y int) {
 	// Composite the text on top of the shadow
 	mw.CompositeImage(cw, imagick.COMPOSITE_OP_OVER, 5, 5)
 	cw.Destroy()
+	return mw
 }
 
 func findfonts() {

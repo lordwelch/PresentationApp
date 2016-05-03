@@ -23,11 +23,11 @@ type cell struct {
 	qmlcell qml.Object
 	index   int
 	font    struct {
-		name         string
-		size         int
-		color        color.RGBA
-		outline      float32
-		outlineColor color.RGBA
+		name                    string
+		outlineSize, size, x, y float64
+		color                   color.RGBA
+		outlineColor            color.RGBA
+		outline                 Bool
 	}
 }
 type slide []*cell
@@ -52,6 +52,7 @@ func main() {
 
 func run() error {
 	imagick.Initialize()
+	findfonts()
 
 	engine = qml.NewEngine()
 	engine.AddImageProvider("images", imgProvider)
@@ -104,6 +105,7 @@ func run() error {
 //Adds a new cell
 func (sl *slide) add( /*cl *cell*/ ) {
 	var cl cell
+	cl.Init()
 	//gets the length so that the index is valid
 	cl.index = len(*sl)
 
@@ -114,25 +116,38 @@ func (sl *slide) add( /*cl *cell*/ ) {
 	cl.qmlcell.Set("parent", window.ObjectByName("data1"))
 	cl.qmlcell.Set("index", cl.index)
 
-	//load image
-	cl.img = imagick.NewMagickWand()
-	cl.img.ReadImage("logo:")
-
-	//give QML the text
-	cl.qmlcell.ObjectByName("cellText").Set("text", cl.text)
-
 	//keep the pointer/dereference (i'm not sure which it is)
 	//problems occur otherwise
 	*sl = append(*sl, &cl)
 
 	//seperate image object in QML
-	cl.qmlimg = qimg.Create(engine.Context())
 	cl.qmlimg.Set("objectName", fmt.Sprintf("cellImg%d", cl.index))
 	cl.qmlimg.Set("source", fmt.Sprintf("image://images/%d"+`;`+"0", cl.index))
 	cl.qmlimg.Set("parent", window.ObjectByName("data2"))
 	cl.qmlimg.Set("index", cl.index)
 	cl.setSignal()
 
+}
+
+func (cl *cell) Init() {
+	cl.text = "Testing 1... 2... 3... :-P"
+	cl.index = -1
+	cl.font.color, cl.font.outlineColor = color.RGBA{0, 0, 0, 1}, color.RGBA{1, 1, 1, 1}
+	cl.font.name = fontlst[1]
+	cl.font.outline = false
+	cl.font.outlineSize = 1
+	cl.font.size = 35
+	cl.font.x, cl.font.y = 10, 30
+
+	cl.qmlcell = cellQml.Create(engine.Context())
+	cl.qmlimg = qimg.Create(engine.Context())
+
+	//load image
+	cl.img = imagick.NewMagickWand()
+	cl.img.ReadImage("logo:")
+
+	//give QML the text
+	cl.qmlcell.ObjectByName("cellText").Set("text", cl.text)
 }
 
 //(cell) remove() should destroy everything for this cell
