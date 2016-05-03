@@ -93,6 +93,7 @@ func run() error {
 
 	window.Show()
 	window2.Show()
+    edtQmlShow()
 	slides[0].clearcache()
 	qml.RunMain(glInit)
 
@@ -126,14 +127,16 @@ func (sl *slide) add( /*cl *cell*/ ) {
 	cl.qmlimg.Set("parent", window.ObjectByName("data2"))
 	cl.qmlimg.Set("index", cl.index)
 	cl.setSignal()
+	//give QML the text
+	cl.qmlcell.ObjectByName("cellText").Set("text", cl.text)
 
 }
 
 func (cl *cell) Init() {
-	cl.text = "Testing 1... 2... 3... :-P"
+	cl.text = "hello this is text\nhaha\nhdsjfklfhaskjd"
 	cl.index = -1
 	cl.font.color, cl.font.outlineColor = color.RGBA{0, 0, 0, 1}, color.RGBA{1, 1, 1, 1}
-	cl.font.name = fontlst[1]
+	cl.font.name = "none"
 	cl.font.outline = false
 	cl.font.outlineSize = 1
 	cl.font.size = 35
@@ -146,8 +149,6 @@ func (cl *cell) Init() {
 	cl.img = imagick.NewMagickWand()
 	cl.img.ReadImage("logo:")
 
-	//give QML the text
-	cl.qmlcell.ObjectByName("cellText").Set("text", cl.text)
 }
 
 //(cell) remove() should destroy everything for this cell

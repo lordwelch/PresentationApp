@@ -10,14 +10,18 @@ ApplicationWindow {
     ColorDialog {
         id: textClrDialog
         //objectname: "textClrDialog"
+        // @disable-check M16
         title: "Please choose a color for the text"
+        // @disable-check M16
         showAlphaChannel: true
     }
 
     ColorDialog {
         id: outlineClrDialog
         //objectname: "outlineClrDialog"
+        // @disable-check M16
         title: "Please choose a color for the text"
+        // @disable-check M16
         showAlphaChannel: true
     }
 
@@ -205,8 +209,10 @@ ApplicationWindow {
 
                 ComboBox {
                     id: fontPicker
-                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                     objectName: "fontPicker"
+                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                    model: ["test","test1","test2"]
+
                 }
 
                 SpinBox {
@@ -216,6 +222,7 @@ ApplicationWindow {
                     maximumValue: 1000
                     value: 1
                     suffix: "Pt"
+
                 }
 
                 SpinBox {

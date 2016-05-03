@@ -7,6 +7,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
+    "fmt"
 
 	"github.com/lordwelch/qml"
 )
@@ -152,8 +153,13 @@ func setSignals() {
 			}
 		}
 	})
-
 }
+
+func edtQmlShow() {
+        var slc *[]string
+        edtQml.Common.ObjectByName("fontPicker").List("model").Convert(slc)
+        fmt.Println(slc)
+    }
 
 //imgProvider() for preview images in QML
 func imgProvider(id string, width, height int) image.Image {

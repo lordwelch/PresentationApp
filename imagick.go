@@ -111,7 +111,9 @@ func (cl *cell) imgtext(width, height int) *imagick.MagickWand {
 	r, g, b, _ := cl.font.color.RGBA()
 	pw.SetColor(fmt.Sprintf("rgb(%d,%d,%d)", r, g, b))
 	dw.SetFillColor(pw)
-	dw.SetFont(cl.font.name)
+	if (cl.font.name != "") || (cl.font.name != "none") {
+		dw.SetFont(cl.font.name)
+	}
 	dw.SetFontSize(cl.font.size)
 
 	otlne := "none"

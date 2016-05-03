@@ -13,7 +13,7 @@ Rectangle {
         id: cellText
         enabled: true
         objectName: "cellText"
-        text: "hello this is text\nhaha\nhdsjfklfhaskjd"
+        text: ""
         clip: true
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         anchors.fill: parent
