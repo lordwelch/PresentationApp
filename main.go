@@ -16,6 +16,17 @@ import (
 //Bool type i'm lazy wanted a toggle function
 type Bool bool
 
+type qmlVar struct {
+	FontList   []string
+	FontLen    int
+	Verses     []string
+	VerseLen   int
+	VerseOrder []string
+	OrderLen   int
+	Img        []string
+	ImgLen     int
+}
+
 type cell struct {
 	text    string
 	img     *imagick.MagickWand
@@ -88,12 +99,16 @@ func run() error {
 	setSignals()
 	slides.add()
 
+	//var from GO to qml
+	QML = &qmlVar{}
+	engine.Context().SetVar("GO", QML)
+
 	//image is ready for imageprovider
 	imgready = true
 
 	window.Show()
 	window2.Show()
-    edtQmlShow()
+	edtQmlShow()
 	slides[0].clearcache()
 	qml.RunMain(glInit)
 

@@ -1,7 +1,8 @@
 import QtQuick 2.4
-import QtQuick.Controls 1.3
+import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.2
+//import Qt.labs.controls 1.0
 
 ApplicationWindow {
     minimumHeight: 480
@@ -77,7 +78,7 @@ ApplicationWindow {
 
                 Label {
                     id: label1
-                    text: qsTr("Label")
+                    text: qsTr("Verses")
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 }
                 ListView {
@@ -93,30 +94,15 @@ ApplicationWindow {
                     focus: true
                     keyNavigationWraps: true
                     boundsBehavior: Flickable.StopAtBounds
-                    model: ListModel {
-                        ListElement {
-                            name: "v1"
-                        }
-                        ListElement {
-                            name: "v2"
-                        }
-                        ListElement {
-                            name: "v3"
-                        }
-                        ListElement {
-                            name: "v4"
-                        }
-                        ListElement {
-                            name: "v5"
-                        }
-                    }
+                    model: GO.verseLen
+
                     delegate: Item {
                         x: 5
                         width: 80
                         height: 40
 
                         Text {
-                            text: name
+                            text: GO.verses(index)
                             anchors.verticalCenter: parent.verticalCenter
                             font.bold: true
                         }
@@ -131,7 +117,7 @@ ApplicationWindow {
 
                 Label {
                     id: label2
-                    text: qsTr("Label")
+                    text: qsTr("Verse Order")
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 }
                 ListView {
@@ -145,30 +131,14 @@ ApplicationWindow {
                     Layout.fillHeight: true
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                     boundsBehavior: Flickable.StopAtBounds
-                    model: ListModel {
-                        ListElement {
-                            name: "v1"
-                        }
-                        ListElement {
-                            name: "v2"
-                        }
-                        ListElement {
-                            name: "v3"
-                        }
-                        ListElement {
-                            name: "v4"
-                        }
-                        ListElement {
-                            name: "v5"
-                        }
-                    }
+                    model: GO.orderLen
                     delegate: Item {
                         x: 5
                         width: 80
                         height: 40
 
                         Text {
-                            text: name
+                            text: GO.verseOrder(index)
                             anchors.verticalCenter: parent.verticalCenter
                             font.bold: true
                         }
@@ -211,7 +181,11 @@ ApplicationWindow {
                     id: fontPicker
                     objectName: "fontPicker"
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                    model: ["test","test1","test2"]
+                    model: GO.fontLen
+                    // @disable-check M16
+                    /*delegate:Text {
+                        text: GO.fontList(index)
+                    }*/
 
                 }
 
@@ -222,7 +196,6 @@ ApplicationWindow {
                     maximumValue: 1000
                     value: 1
                     suffix: "Pt"
-
                 }
 
                 SpinBox {
@@ -247,25 +220,35 @@ ApplicationWindow {
                 ComboBox {
                     id: versePicker
                     objectName: "versePicker"
+                    model: GO.verseLen
+                    // @disable-check M16
+                   /* delegate: Text {
+                        text: GO.verses(index)
+                    }*/
                 }
 
                 ComboBox {
                     id: imgPicker
                     objectName: "imgPicker"
+                    model: GO.imgLen
+                    // @disable-check M16
+                    /*delegate: Text {
+                        text: GO.img(index)
+                    }*/
                 }
-            }
-            TextArea {
-                id: textEdit1
-                width: 80
-                height: 20
-                text: qsTr("Text Edit")
-                textFormat: Text.AutoText
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                font.pixelSize: 12
-                selectByKeyboard: true
-                selectByMouse: true
+                TextArea {
+                    id: textEdit1
+                    width: 80
+                    height: 20
+                    text: qsTr("Text Edit")
+                    textFormat: Text.AutoText
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                    font.pixelSize: 12
+                    selectByKeyboard: true
+                    selectByMouse: true
+                }
             }
         }
     }

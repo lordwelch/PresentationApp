@@ -2,12 +2,12 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"path/filepath"
 	"runtime/debug"
 	"strconv"
 	"strings"
-    "fmt"
 
 	"github.com/lordwelch/qml"
 )
@@ -24,7 +24,15 @@ var (
 	engine     *qml.Engine
 	quickEdit  Bool = false
 	imgready   Bool = false
+	QML        qmlVar
 )
+
+func (qv *qmlVar) Changed() {
+	qml.Changed(qv,qv.VerseLen)
+	qml.Changed(qv,qv.OrderLen)
+	qml.Changed(qv,qv.ImgLen)
+	qml.Changed(qv,qv.FontLen)
+}
 
 //signals for the cell and image in qml
 func (cl *cell) setSignal() {
@@ -156,10 +164,10 @@ func setSignals() {
 }
 
 func edtQmlShow() {
-        var slc *[]string
-        edtQml.Common.ObjectByName("fontPicker").List("model").Convert(slc)
-        fmt.Println(slc)
-    }
+	var slc *[]string
+	edtQml.Common.ObjectByName("fontPicker").List("model").Convert(slc)
+	fmt.Println(slc)
+}
 
 //imgProvider() for preview images in QML
 func imgProvider(id string, width, height int) image.Image {

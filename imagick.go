@@ -13,10 +13,6 @@ import (
 	"gopkg.in/gographics/imagick.v2/imagick"
 )
 
-var (
-	fontlst []string
-)
-
 /*resizeImage() mw fullsize image
 newwidth, newheight = size to be resized to
 keepSpecSize = return image with exactly the size specified or just the size of the resized image
