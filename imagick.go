@@ -160,7 +160,8 @@ func findfonts() {
 	if err != nil {
 		log.Print(err)
 	}
-	fontlst = strings.Split(out.String(), "\n")
+	QML.FontList = strings.Split(out.String(), "\n")
+	QML.FontLen = len(QML.FontList)
 }
 
 func round(a float64) int {

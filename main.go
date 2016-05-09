@@ -63,9 +63,11 @@ func main() {
 
 func run() error {
 	imagick.Initialize()
-	findfonts()
 
 	engine = qml.NewEngine()
+	QML = &qmlVar{}
+	engine.Context().SetVar("go", QML)
+	findfonts()
 	engine.AddImageProvider("images", imgProvider)
 	//path for qml files TODO: change to somewhere else
 	path, err = osext.ExecutableFolder()
@@ -92,7 +94,7 @@ func run() error {
 	}
 
 	window = mainQml.CreateWindow(engine.Context())
-	window2 := edtQml.CreateWindow(engine.Context())
+	window2 = edtQml.CreateWindow(engine.Context())
 
 	textEdit = window.ObjectByName("textEdit")
 	//signals for whole qml
@@ -100,8 +102,6 @@ func run() error {
 	slides.add()
 
 	//var from GO to qml
-	QML = &qmlVar{}
-	engine.Context().SetVar("GO", QML)
 
 	//image is ready for imageprovider
 	imgready = true

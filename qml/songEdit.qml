@@ -82,7 +82,8 @@ ApplicationWindow {
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 }
                 ListView {
-                    id: listView1
+                    id: lstVerses
+		    objectName: "lstVerses"
                     clip: true
                     highlight: Rectangle {
                         color: "lightsteelblue"
@@ -94,7 +95,7 @@ ApplicationWindow {
                     focus: true
                     keyNavigationWraps: true
                     boundsBehavior: Flickable.StopAtBounds
-                    model: GO.verseLen
+                    model: go.verseLen
 
                     delegate: Item {
                         x: 5
@@ -102,7 +103,7 @@ ApplicationWindow {
                         height: 40
 
                         Text {
-                            text: GO.verses(index)
+                            text: go.verses(index)
                             anchors.verticalCenter: parent.verticalCenter
                             font.bold: true
                         }
@@ -121,7 +122,8 @@ ApplicationWindow {
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 }
                 ListView {
-                    id: listView2
+                    id: lstOrder
+		    objectName: "lstOrder"
                     clip: true
                     highlight: Rectangle {
                         color: "lightsteelblue"
@@ -131,14 +133,14 @@ ApplicationWindow {
                     Layout.fillHeight: true
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                     boundsBehavior: Flickable.StopAtBounds
-                    model: GO.orderLen
+                    model: go.orderLen
                     delegate: Item {
                         x: 5
                         width: 80
                         height: 40
 
                         Text {
-                            text: GO.verseOrder(index)
+                            text: go.verseOrder(index)
                             anchors.verticalCenter: parent.verticalCenter
                             font.bold: true
                         }
@@ -181,18 +183,18 @@ ApplicationWindow {
                     id: fontPicker
                     objectName: "fontPicker"
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                    model: GO.fontLen
+                    model: go.fontLen
                     // @disable-check M16
                     /*delegate:Text {
-                        text: GO.fontList(index)
+                        text: go.fontList(index)
                     }*/
 
                 }
 
                 SpinBox {
                     id: fontSize
-                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                     objectName: "fontSize"
+                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                     maximumValue: 1000
                     value: 1
                     suffix: "Pt"
@@ -220,24 +222,25 @@ ApplicationWindow {
                 ComboBox {
                     id: versePicker
                     objectName: "versePicker"
-                    model: GO.verseLen
+                    model: go.verseLen
                     // @disable-check M16
                    /* delegate: Text {
-                        text: GO.verses(index)
+                        text: go.verses(index)
                     }*/
                 }
 
                 ComboBox {
                     id: imgPicker
                     objectName: "imgPicker"
-                    model: GO.imgLen
+                    model: go.imgLen
                     // @disable-check M16
                     /*delegate: Text {
-                        text: GO.img(index)
+                        text: go.img(index)
                     }*/
                 }
                 TextArea {
-                    id: textEdit1
+                    id: txtVerse
+		    objectName: "txtVerse"
                     width: 80
                     height: 20
                     text: qsTr("Text Edit")

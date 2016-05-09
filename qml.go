@@ -21,17 +21,24 @@ var (
 	edtQml     qml.Object
 	textEdit   qml.Object
 	window     *qml.Window
+	window2    *qml.Window
 	engine     *qml.Engine
 	quickEdit  Bool = false
 	imgready   Bool = false
-	QML        qmlVar
+	QML        *qmlVar
 )
 
+func initQML() {
+	window2.ObjectByName("textClrDialog").On("accepted", func() {
+		window2.ObjectByName("textClrDialog").Color("color")
+	})
+}
+
 func (qv *qmlVar) Changed() {
-	qml.Changed(qv,qv.VerseLen)
-	qml.Changed(qv,qv.OrderLen)
-	qml.Changed(qv,qv.ImgLen)
-	qml.Changed(qv,qv.FontLen)
+	qml.Changed(qv, qv.VerseLen)
+	qml.Changed(qv, qv.OrderLen)
+	qml.Changed(qv, qv.ImgLen)
+	qml.Changed(qv, qv.FontLen)
 }
 
 //signals for the cell and image in qml
@@ -164,8 +171,7 @@ func setSignals() {
 }
 
 func edtQmlShow() {
-	var slc *[]string
-	edtQml.Common.ObjectByName("fontPicker").List("model").Convert(slc)
+	slc := window2.ObjectByName("fontPicker").Property("model")
 	fmt.Println(slc)
 }
 
