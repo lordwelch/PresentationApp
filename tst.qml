@@ -9,7 +9,7 @@ ApplicationWindow {
 
     Item {
         id: tst4
-        height: 50 + (tst3.subCount * 40)
+        height: 50 + ((tst3.count-1)*50) + (tst3.subCount * 40)
         anchors.right: parent.right
         anchors.rightMargin: 0
         anchors.left: parent.left
@@ -20,27 +20,7 @@ ApplicationWindow {
             id: tst3
             anchors.fill: parent
             property int subCount: 0
-            model: ListModel {
-                id: nestedModel
-                ListElement {
-                    categoryName: "Cars"
-                    collapsed: true
-                    subItems: [
-                        ListElement {
-                            itemName: "Nissan"
-                        },
-                        ListElement {
-                            itemName: "Toyota"
-                        },
-                        ListElement {
-                            itemName: "Chevy"
-                        },
-                        ListElement {
-                            itemName: "Audi"
-                        }
-                    ]
-                }
-            }
+            model: nestedModel
             delegate: Component {
                 id: categoryDelegate
                 Column {
@@ -78,12 +58,11 @@ ApplicationWindow {
 
                                 // Toggle the 'collapsed' property
                                 onClicked: {
-                                    nestedModel.setProperty(index, "collapsed",
-                                                            !collapsed)
+                                    nestedModel.setProperty(index, "collapsed", !collapsed)
                                     if (!nestedModel.get(index).collapsed) {
-                                        tst3.subCount = subItemLoader.subItemModel.count
+                                        tst3.subCount = tst3.subCount + subItemLoader.subItemModel.count
                                     } else {
-                                        tst3.subCount = 0
+                                        tst3.subCount = tst3.subCount - subItemLoader.subItemModel.count
                                     }
                                 }
                             }
@@ -133,5 +112,62 @@ ApplicationWindow {
                 }
             }
         }
+        ListModel {
+                        id: nestedModel
+                        ListElement {
+                            categoryName: "Cars"
+                            collapsed: true
+                            subItems: [
+                                ListElement {
+                                    itemName: "Nissan"
+                                },
+                                ListElement {
+                                    itemName: "Toyota"
+                                },
+                                ListElement {
+                                    itemName: "Chevy"
+                                },
+                                ListElement {
+                                    itemName: "Audi"
+                                }
+                            ]
+                        }
+                        ListElement {
+                            categoryName: "Cars"
+                            collapsed: true
+                            subItems: [
+                                ListElement {
+                                    itemName: "Nissan"
+                                },
+                                ListElement {
+                                    itemName: "Toyota"
+                                },
+                                ListElement {
+                                    itemName: "Chevy"
+                                },
+                                ListElement {
+                                    itemName: "Audi"
+                                }
+                            ]
+                        }
+                        ListElement {
+                            categoryName: "Cars"
+                            collapsed: true
+                            subItems: [
+                                ListElement {
+                                    itemName: "Nissan"
+                                },
+                                ListElement {
+                                    itemName: "Toyota"
+                                },
+                                ListElement {
+                                    itemName: "Chevy"
+                                },
+                                ListElement {
+                                    itemName: "Audi"
+                                }
+                            ]
+                        }
+                    }
     }
 }

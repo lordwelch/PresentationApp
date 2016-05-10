@@ -196,128 +196,16 @@ ApplicationWindow {
                             height: data1.childrenRect.height
 
                             Item {
-                                id:tst6
-                                height: 50+(tst5.subCount*40)
+                                id: tst4
+                                height: 50 + ((tst3.count-1)*50) + (tst3.subCount * 40)
                                 anchors.right: parent.right
+                                anchors.rightMargin: 0
                                 anchors.left: parent.left
-                                clip: true
+                                anchors.leftMargin: 0
+
 
                                 ListView {
-                                    id:tst5
-                                    anchors.fill: parent
-                                    property int subCount: 0
-                                    model: ListModel {
-                                        id: nestedModel1
-                                        ListElement {
-                                            categoryName: "Cars"
-                                            collapsed: true
-                                            subItems: [
-                                                ListElement { itemName: "Nissan" },
-                                                ListElement { itemName: "Toyota" },
-                                                ListElement { itemName: "Chevy" },
-                                                ListElement { itemName: "Audi" }
-                                            ]
-                                        }
-                                    }
-                                    delegate: Component {
-                                        id: categoryDelegate1
-                                        Column {
-                                            anchors.right: parent.right
-                                            anchors.left: parent.left
-                                            //width: 200
-
-                                            Rectangle {
-                                                id: categoryItem
-                                                anchors.right: parent.right
-                                                anchors.left: parent.left
-                                                border.color: "black"
-                                                border.width: 5
-                                                color: "white"
-                                                height: 50
-                                                //width: 200
-
-                                                Text {
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                    x: 15
-                                                    font.pixelSize: 24
-                                                    text: categoryName
-                                                }
-
-                                                Rectangle {
-                                                    color: "red"
-                                                    width: 30
-                                                    height: 30
-                                                    anchors.right: parent.right
-                                                    anchors.rightMargin: 15
-                                                    anchors.verticalCenter: parent.verticalCenter
-
-                                                    MouseArea {
-                                                        anchors.fill: parent
-
-                                                        // Toggle the 'collapsed' property
-                                                        onClicked: {
-                                                            nestedModel1.setProperty(index, "collapsed", !collapsed)
-                                                            if (!nestedModel1.get(index).collapsed) {
-                                                                tst5.subCount = subItemLoader.subItemModel.count
-                                                            } else {
-                                                                tst5.subCount = 0
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-
-                                            Loader {
-                                                id: subItemLoader
-
-                                                // This is a workaround for a bug/feature in the Loader element. If sourceComponent is set to null
-                                                // the Loader element retains the same height it had when sourceComponent was set. Setting visible
-                                                // to false makes the parent Column treat it as if it's height was 0.
-                                                visible: !collapsed
-                                                property variant subItemModel: subItems
-                                                sourceComponent: collapsed ? null : subItemColumnDelegate1
-                                                onStatusChanged: if (status == Loader.Ready)
-                                                                     item.model = subItemModel
-                                            }
-                                        }
-                                    }
-                                }
-
-                                Component {
-                                    id: subItemColumnDelegate1
-                                    Column {
-                                        property alias model: subItemRepeater.model
-
-                                        width: col1.width
-                                        Repeater {
-                                            id: subItemRepeater
-                                            delegate: Rectangle {
-                                                color: "#cccccc"
-                                                height: 40
-                                                anchors.right: parent.right
-                                                anchors.left: parent.left
-                                                //width: 200
-                                                border.color: "black"
-                                                border.width: 2
-
-                                                Text {
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                    x: 30
-                                                    font.pixelSize: 18
-                                                    text: itemName
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }Item {
-                                id:tst4
-                                height: 50+(tst3.subCount*40)
-                                anchors.right: parent.right
-                                anchors.left: parent.left
-
-                                ListView {
-                                    id:tst3
+                                    id: tst3
                                     anchors.fill: parent
                                     property int subCount: 0
                                     model: ListModel {
@@ -326,10 +214,54 @@ ApplicationWindow {
                                             categoryName: "Cars"
                                             collapsed: true
                                             subItems: [
-                                                ListElement { itemName: "Nissan" },
-                                                ListElement { itemName: "Toyota" },
-                                                ListElement { itemName: "Chevy" },
-                                                ListElement { itemName: "Audi" }
+                                                ListElement {
+                                                    itemName: "Nissan"
+                                                },
+                                                ListElement {
+                                                    itemName: "Toyota"
+                                                },
+                                                ListElement {
+                                                    itemName: "Chevy"
+                                                },
+                                                ListElement {
+                                                    itemName: "Audi"
+                                                }
+                                            ]
+                                        }
+                                        ListElement {
+                                            categoryName: "Cars"
+                                            collapsed: true
+                                            subItems: [
+                                                ListElement {
+                                                    itemName: "Nissan"
+                                                },
+                                                ListElement {
+                                                    itemName: "Toyota"
+                                                },
+                                                ListElement {
+                                                    itemName: "Chevy"
+                                                },
+                                                ListElement {
+                                                    itemName: "Audi"
+                                                }
+                                            ]
+                                        }
+                                        ListElement {
+                                            categoryName: "Cars"
+                                            collapsed: true
+                                            subItems: [
+                                                ListElement {
+                                                    itemName: "Nissan"
+                                                },
+                                                ListElement {
+                                                    itemName: "Toyota"
+                                                },
+                                                ListElement {
+                                                    itemName: "Chevy"
+                                                },
+                                                ListElement {
+                                                    itemName: "Audi"
+                                                }
                                             ]
                                         }
                                     }
@@ -338,8 +270,8 @@ ApplicationWindow {
                                         Column {
                                             anchors.right: parent.right
                                             anchors.left: parent.left
-                                            //width: 200
 
+                                            //width: 200
                                             Rectangle {
                                                 id: categoryItem
                                                 anchors.right: parent.right
@@ -348,8 +280,8 @@ ApplicationWindow {
                                                 border.width: 5
                                                 color: "white"
                                                 height: 50
-                                                //width: 200
 
+                                                //width: 200
                                                 Text {
                                                     anchors.verticalCenter: parent.verticalCenter
                                                     x: 15
@@ -372,9 +304,9 @@ ApplicationWindow {
                                                         onClicked: {
                                                             nestedModel.setProperty(index, "collapsed", !collapsed)
                                                             if (!nestedModel.get(index).collapsed) {
-                                                                tst3.subCount = subItemLoader.subItemModel.count
+                                                                tst3.subCount = tst3.subCount + subItemLoader.subItemModel.count
                                                             } else {
-                                                                tst3.subCount = 0
+                                                                tst3.subCount = tst3.subCount - subItemLoader.subItemModel.count
                                                             }
                                                         }
                                                     }
@@ -402,121 +334,7 @@ ApplicationWindow {
                                     Column {
                                         property alias model: subItemRepeater.model
 
-                                        width: col1.width
-                                        Repeater {
-                                            id: subItemRepeater
-                                            delegate: Rectangle {
-                                                color: "#cccccc"
-                                                height: 40
-                                                anchors.right: parent.right
-                                                anchors.left: parent.left
-                                                //width: 200
-                                                border.color: "black"
-                                                border.width: 2
-
-                                                Text {
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                    x: 30
-                                                    font.pixelSize: 18
-                                                    text: itemName
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }Item {
-                                id: tst2
-                                height: 50+(tst1.subCount*40)
-                                anchors.right: parent.right
-                                anchors.left: parent.left
-
-                                ListView {
-                                    id: tst1
-                                    anchors.fill: parent
-                                    property int subCount: 0
-                                    model: ListModel {
-                                        id: nestedMdel
-                                        ListElement {
-                                            categoryName: "Cars "
-                                            collapsed: true
-                                            subIte: [
-                                                ListElement { itemName: "Nissan" },
-                                                ListElement { itemName: "Toyota" },
-                                                ListElement { itemName: "Chevy" },
-                                                ListElement { itemName: "Audi" }
-                                            ]
-                                        }
-                                    }
-                                    delegate: Component {
-                                        id: categoryDlegate
-                                        Column {
-                                            anchors.right: parent.right
-                                            anchors.left: parent.left
-                                            //width: 200
-
-                                            Rectangle {
-                                                id: categoryItem
-                                                anchors.right: parent.right
-                                                anchors.left: parent.left
-                                                border.color: "black"
-                                                border.width: 5
-                                                color: "white"
-                                                height: 50
-                                                //width: 200
-
-                                                Text {
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                    x: 15
-                                                    font.pixelSize: 24
-                                                    text: categoryName
-                                                }
-
-                                                Rectangle {
-                                                    color: "red"
-                                                    width: 30
-                                                    height: 30
-                                                    anchors.right: parent.right
-                                                    anchors.rightMargin: 15
-                                                    anchors.verticalCenter: parent.verticalCenter
-
-                                                    MouseArea {
-                                                        anchors.fill: parent
-
-                                                        // Toggle the 'collapsed' property
-                                                        onClicked: {
-                                                            nestedMdel.setProperty(index, "collapsed", !collapsed)
-                                                            if (!nestedMdel.get(index).collapsed) {
-                                                                tst1.subCount = subItemLoader.subItemModel.count
-                                                            } else {
-                                                                tst1.subCount = 0
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-
-                                            Loader {
-                                                id: subItemLoader
-
-                                                // This is a workaround for a bug/feature in the Loader element. If sourceComponent is set to null
-                                                // the Loader element retains the same height it had when sourceComponent was set. Setting visible
-                                                // to false makes the parent Column treat it as if it's height was 0.
-                                                visible: !collapsed
-                                                property variant subItemModel: subIte
-                                                sourceComponent: collapsed ? null : subItemColumnDlegate
-                                                onStatusChanged: if (status == Loader.Ready)
-                                                                     item.model = subItemModel
-                                            }
-                                        }
-                                    }
-                                }
-
-                                Component {
-                                    id: subItemColumnDlegate
-                                    Column {
-                                        property alias model: subItemRepeater.model
-
-                                        width: col1.width
+                                        width: tst4.width
                                         Repeater {
                                             id: subItemRepeater
                                             delegate: Rectangle {
@@ -593,7 +411,7 @@ ApplicationWindow {
                 id: button3
                 x: 8
                 y: 70
-                text: qsTr("Button ") + tst2.height
+                text: qsTr("Button ")
                 objectName: "btnMem"
             }
         }
