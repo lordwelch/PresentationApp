@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	selCell    int        //the focused and
+	selCell    int        //the focused cell
 	rhtClkCell int        //the cell that was last right clicked
 	qimg       qml.Object //file for the image object
 	cellQml    qml.Object //file for the cell object
@@ -193,10 +193,8 @@ func imgProvider(id string, width, height int) image.Image {
 //just gives a new source so that the cache isn't used
 func (cl *cell) clearcache() {
 	str := cl.qmlimg.String("source")
-	//fmt.Println("source (click): ", str)
 	i := strings.Index(str, `;`)
 	str1 := str[:i]
-	//fmt.Println("ext (click): ", str1)
 	i1, _ := strconv.Atoi(str[i+1:])
 	str = str1 + `;` + strconv.Itoa(i1+1)
 	//fmt.Println("new source (click): ", str)

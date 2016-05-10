@@ -1,14 +1,14 @@
 // PresentationApp project main.go
+//go:generate genqrc qml
+
 package main
 
 import (
 	"fmt"
 	"image/color"
 	"os"
-	"path/filepath"
 
 	"github.com/go-gl/glfw/v3.1/glfw"
-	"github.com/kardianos/osext"
 	"github.com/lordwelch/qml"
 	"gopkg.in/gographics/imagick.v2/imagick"
 )
@@ -41,6 +41,7 @@ type cell struct {
 		outline                 Bool
 	}
 }
+
 type slide []*cell
 
 var (
@@ -69,9 +70,7 @@ func run() error {
 	engine.Context().SetVar("go", QML)
 	findfonts()
 	engine.AddImageProvider("images", imgProvider)
-	//path for qml files TODO: change to somewhere else
-	path, err = osext.ExecutableFolder()
-	path = filepath.Clean(path + "/../src/github.com/lordwelch/PresentationApp/")
+	path = "qrc:///qml"
 
 	mainQml, err = engine.LoadFile(path + "/main.qml")
 	if err != nil {
