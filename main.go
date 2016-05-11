@@ -92,6 +92,16 @@ func run() error {
 		return err
 	}
 
+	qlst, err := engine.LoadFile(path + "/lst/tst.qml")
+	if err != nil {
+		return err
+	}
+
+	qlstEle, err := engine.LoadFile(path + "/lst/lstEle.qml")
+	if err != nil {
+		return err
+	}
+
 	window = mainQml.CreateWindow(engine.Context())
 	window2 = edtQml.CreateWindow(engine.Context())
 
@@ -104,7 +114,12 @@ func run() error {
 
 	//image is ready for imageprovider
 	imgready = true
-
+	tstlst :=qlst.Create(engine.Context())
+	tstlst.Set("parent", window.ObjectByName("data1"))
+	tstLlst := qlstEle.Create(engine.Context())
+	tstLlst.Call("get1")
+	//fmt.Println(tstLlst.Property("id1"))
+	tstlst.Call("addLst")  //.Call("get1")  //).(qml.Object).Create(engine.Context()).Set("parent", qlst.ObjectByName("nestedModel"))
 	window.Show()
 	window2.Show()
 	edtQmlShow()

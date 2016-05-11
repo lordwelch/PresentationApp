@@ -2,7 +2,6 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"path/filepath"
 	"runtime/debug"
@@ -171,8 +170,8 @@ func setSignals() {
 }
 
 func edtQmlShow() {
-	slc := window2.ObjectByName("fontPicker").Property("model")
-	fmt.Println(slc)
+	//slc := window2.ObjectByName("fontPicker").Property("model")
+	//fmt.Println(slc)
 }
 
 //imgProvider() for preview images in QML
