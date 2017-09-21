@@ -13,7 +13,7 @@ import (
 func init() {
 	var r *qml.Resources
 	var err error
-	if true/*os.Getenv("QRC_REPACK") == "1"*/ {
+	if true /*os.Getenv("QRC_REPACK") == "1"*/ {
 		err = qrcRepackResources()
 		if err != nil {
 			panic("cannot repack qrc resources: " + err.Error())
