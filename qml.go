@@ -8,90 +8,129 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/lordwelch/qml"
+	"github.com/limetext/qml-go"
 )
 
 var (
-	selCell    int        //the focused cell
-	rhtClkCell int        //the cell that was last right clicked
-	qimg       qml.Object //file for the image object
-	cellQml    qml.Object //file for the cell object
-	mainQml    qml.Object //main QML file
-	edtQml     qml.Object
-	textEdit   qml.Object
-	window     *qml.Window
-	window2    *qml.Window
-	engine     *qml.Engine
-	quickEdit  Bool = false
-	imgready   Bool = false
-	QML        *qmlVar
+	selectedCell   int        //the focused cell
+	rightClickCell int        //the cell that was last right clicked
+	cellQml        qml.Object //file for the cell object
+	mainQml        qml.Object //main QML file
+	editQml        qml.Object
+	textEdit       qml.Object
+	displayQml     qml.Object
+	displayImg     qml.Object
+	DisplayWindow  *qml.Window
+	MainWindow     *qml.Window
+	songEditWindow *qml.Window
+	serviceObject  qml.Object
+	serviceQml     qml.Object
+	engine         *qml.Engine
+	quickEdit      bool = false
+	imgready       bool = false
+	QML            *qmlVar
 )
 
 func initQML() {
-	window2.ObjectByName("textClrDialog").On("accepted", func() {
+	/*window2.ObjectByName("textClrDialog").On("accepted", func() {
 		window2.ObjectByName("textClrDialog").Color("color")
-	})
+	})*/
 }
 
-func (qv *qmlVar) Changed() {
+func qmlWindows() error {
+	mainQml, err = engine.LoadFile(path + "/Main.qml")
+	if err != nil {
+		return err
+	}
+
+	displayQml, err = engine.LoadFile(path + "/Display.qml")
+	if err != nil {
+		return err
+	}
+
+	editQml, err = engine.LoadFile(path + "/SongEdit.qml")
+	if err != nil {
+		return err
+	}
+
+	cellQml, err = engine.LoadFile(path + "/Cell.qml")
+	if err != nil {
+		return err
+	}
+
+	serviceQml, err = engine.LoadFile(path + "/Service.qml")
+	if err != nil {
+		return err
+	}
+
+	MainWindow = mainQml.CreateWindow(engine.Context())
+	songEditWindow = editQml.CreateWindow(engine.Context())
+	DisplayWindow = displayQml.CreateWindow(engine.Context())
+
+	textEdit = MainWindow.ObjectByName("textEdit")
+	return nil
+}
+
+func showWindows() {
+	MainWindow.Show()
+	songEditWindow.Show()
+	DisplayWindow.Show()
+}
+
+/*func (qv *qmlVar) Changed() {
 	qml.Changed(qv, qv.VerseLen)
 	qml.Changed(qv, qv.OrderLen)
 	qml.Changed(qv, qv.ImgLen)
 	qml.Changed(qv, qv.FontLen)
-}
+}*/
 
 //signals for the cell and image in qml
-func (cl *cell) setSignal() {
-	cl.qmlcell.ObjectByName("cellMouse").On("clicked", func(musEvent qml.Object) {
-		btn := musEvent.Property("button")
+func (cl *Cell) setSignal() {
+	cl.qmlObject.ObjectByName("cellMouse").On("clicked", func(mouseEvent qml.Object) {
+		btn := mouseEvent.Property("button")
 		//right click
 		if btn == 2 {
 			//context menu
-			window.ObjectByName("mnuCtx").Call("popup")
-			rhtClkCell = cl.index
+			MainWindow.ObjectByName("mnuCtx").Call("popup")
+			rightClickCell = cl.index
 		} else {
 			//left click
 			//select and update image preview for cell
-			selCell = cl.qmlcell.Int("index")
-			cl.qmlcell.ObjectByName("cellMouse").Set("focus", true)
-			setupScene()
+			cl.Select()
 		}
 		//update image preview
 		cl.clearcache()
 	})
 
-	cl.qmlimg.ObjectByName("cellMouse").On("clicked", func(musEvent qml.Object) {
-		btn := musEvent.Property("button")
+	cl.image.qmlImage.ObjectByName("cellMouse").On("clicked", func(mouseEvent qml.Object) {
+		btn := mouseEvent.Property("button")
 		//right click
 		if btn == 2 {
 			//context menu
-			window.ObjectByName("mnuCtx").Call("popup")
-			rhtClkCell = cl.index
+			MainWindow.ObjectByName("mnuCtx").Call("popup")
+			rightClickCell = cl.index
 		} else {
 			//left click
 			//select and update image preview for cell
-			selCell = cl.qmlcell.Int("index")
-			cl.qmlcell.ObjectByName("cellMouse").Set("focus", true)
-			setupScene()
+			cl.Select()
 		}
-		//update image preview
-		cl.clearcache()
 	})
-	cl.qmlcell.ObjectByName("cellMouse").On("focusChanged", func(focus bool) {
+
+	cl.qmlObject.ObjectByName("cellMouse").On("focusChanged", func(focus bool) {
 		if focus {
-			cl.qmlcell.ObjectByName("cellMouse").Call("selected")
+			cl.qmlObject.ObjectByName("cellMouse").Call("selected")
 		} else {
-			cl.qmlcell.ObjectByName("cellMouse").Call("notSelected")
+			cl.qmlObject.ObjectByName("cellMouse").Call("notSelected")
 		}
 	})
 
-	cl.qmlcell.ObjectByName("cellMouse").On("doubleClicked", func() {
+	cl.qmlObject.ObjectByName("cellMouse").On("doubleClicked", func() {
 		if quickEdit {
 			//cover the cell with the text edit
 			textEdit.Set("cell", cl.index)
-			textEdit.Set("x", cl.qmlcell.Int("x"))
-			textEdit.Set("y", cl.qmlcell.Int("y"))
-			textEdit.Set("height", cl.qmlcell.Int("height"))
+			textEdit.Set("x", cl.qmlObject.Int("x"))
+			textEdit.Set("y", cl.qmlObject.Int("y"))
+			textEdit.Set("height", cl.qmlObject.Int("height"))
 			textEdit.Set("z", 100)
 			textEdit.Set("visible", true)
 			textEdit.ObjectByName("textEdit1").Set("focus", true)
@@ -106,64 +145,45 @@ func (cl *cell) setSignal() {
 
 //setSignals() for non dynamic elements
 func setSignals() {
-	window.ObjectByName("imgpicker").On("accepted", func() {
+	MainWindow.ObjectByName("imgpicker").On("accepted", func() {
 		//delete file://  from url
-		url := filepath.Clean(strings.Replace(window.ObjectByName("imgpicker").String("fileUrl"), "file:", "", 1))
+		url := filepath.Clean(strings.TrimPrefix(MainWindow.ObjectByName("imgpicker").String("fileUrl"), "file:"))
 
 		//replace new image
-		slides[rhtClkCell].img.Clear()
-		slides[rhtClkCell].img.ReadImage(url)
-		setupScene()
-		//update image preview
-		slides[rhtClkCell].clearcache()
+		slides[rightClickCell].image.img.Clear()
+		slides[rightClickCell].image.img.ReadImage(url)
 	})
 
-	window.ObjectByName("btnAdd").On("clicked", func() {
-		slides.add()
+	MainWindow.ObjectByName("btnAdd").On("clicked", func() {
+		slides.add("not")
 	})
 
-	window.ObjectByName("btnRem").On("clicked", func() {
-		slides[len(slides)-1].remove()
+	MainWindow.ObjectByName("btnRem").On("clicked", func() {
+		slides.remove(len(slides) - 1)
 	})
 
-	window.ObjectByName("btnMem").On("clicked", func() {
+	MainWindow.ObjectByName("btnMem").On("clicked", func() {
 		//run GC
 		debug.FreeOSMemory()
 	})
 
-	window.On("closing", func() {
-		//close glfw first
-		if false == window.Property("cls") {
-			win.SetShouldClose(true)
-			window.Set("cls", true)
-		}
-
-	})
-
-	window.ObjectByName("mnuDisplay").On("triggered", func() {
-		win.SetShouldClose(false)
-		window.Set("cls", false)
-		win.Show()
-		qml.ResetGLFW()
-	})
-
-	window.ObjectByName("mnuEdit").On("triggered", func() {
-		(&quickEdit).Toggle()
+	MainWindow.ObjectByName("mnuEdit").On("triggered", func() {
+		quickEdit = !quickEdit
 	})
 
 	textEdit.ObjectByName("textEdit1").On("focusChanged", func(focus bool) {
 		var (
-			str string
-			cel *cell
+			str  string
+			cell *Cell
 		)
 
 		if !focus {
 			//set text back to the cell
 			str = textEdit.ObjectByName("textEdit1").String("text")
-			cel = slides[textEdit.Int("cell")]
+			cell = slides[textEdit.Int("cell")]
 			if textEdit.Bool("txt") {
-				cel.qmlcell.ObjectByName("cellText").Set("text", str)
-				cel.text = str
+				cell.qmlObject.ObjectByName("cellText").Set("text", str)
+				cell.text = str
 			}
 		}
 	})
@@ -176,26 +196,27 @@ func edtQmlShow() {
 
 //imgProvider() for preview images in QML
 func imgProvider(id string, width, height int) image.Image {
+	var img1 image.Image
 	if imgready && (len(id) > 0) {
 		//fmt.Println("source (provider): ", id)
 		i1 := strings.Index(id, `;`)
 		i, _ := strconv.Atoi(id[:i1])
-		return slides[i].getImage(width, height)
-
+		img1 = slides[i].getImage(width, height)
+	} else {
+		img1 = image.NewRGBA(image.Rect(0, 0, 340, 480))
 	}
-	var img1 image.Image = image.NewRGBA(image.Rect(0, 0, 340, 480))
 	return img1
 
 }
 
 //clear cache dosen't actually clear the cache
 //just gives a new source so that the cache isn't used
-func (cl *cell) clearcache() {
-	str := cl.qmlimg.String("source")
+func (cl *Cell) clearcache() {
+	str := cl.image.qmlImage.String("source")
 	i := strings.Index(str, `;`)
 	str1 := str[:i]
 	i1, _ := strconv.Atoi(str[i+1:])
 	str = str1 + `;` + strconv.Itoa(i1+1)
 	//fmt.Println("new source (click): ", str)
-	cl.qmlimg.Set("source", str)
+	cl.image.qmlImage.Set("source", str)
 }

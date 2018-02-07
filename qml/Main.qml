@@ -2,7 +2,7 @@ import QtQuick 2.4
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.3
 import QtQuick.Window 2.0
-import "qml"
+//import "qml"
 import QtQuick.Layouts 1.0
 
 ApplicationWindow {
@@ -14,15 +14,6 @@ ApplicationWindow {
     minimumHeight: 500
     width: 1000
     height: 600
-    property bool cls: false
-
-
-    /*function getFileDialogUrl() {
-            return
-                }*/
-    /*onClosing: if (!cls) {
-                   close.accepted = false
-               }*/
 
     FileDialog {
         id: imgpicker
@@ -30,10 +21,6 @@ ApplicationWindow {
         title: "Choose an image for this slide"
         // @disable-check M16
         objectName: "imgpicker"
-    }
-
-    AboutDialog {
-        id: aboutDialog
     }
 
     Action {
@@ -125,7 +112,7 @@ ApplicationWindow {
                     id: gridData
                     objectName: "gridData"
                     width: scview.width - 1
-                    height: data1.childrenRect.height//gridRect.count * 101
+                    height: data1.childrenRect.height //gridRect.count * 101
 
                     Rectangle {
                         id: col1
@@ -147,7 +134,8 @@ ApplicationWindow {
                             visible: false
                             property bool txt: true
                             Keys.onPressed: {
-                                if ((event.key == Qt.Key_Return) && (event.modifiers & Qt.ControlModifier)) {
+                                if ((event.key == Qt.Key_Return)
+                                        && (event.modifiers & Qt.ControlModifier)) {
                                     txt = true
 
                                     x = -100
@@ -194,7 +182,6 @@ ApplicationWindow {
                             anchors.fill: parent
                             clip: true
                             height: data1.childrenRect.height
-
                         }
                     }
 
@@ -234,7 +221,7 @@ ApplicationWindow {
                 objectName: "btnAdd"
                 x: 8
                 y: 8
-                text: qsTr("Button") +data1.childrenRect.height
+                text: qsTr("Button") + data1.childrenRect.height
             }
 
             Button {

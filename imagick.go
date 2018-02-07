@@ -67,8 +67,8 @@ func resizeImage(mw *imagick.MagickWand, newWidth, newHeight int, keepSpecSize, 
 }
 
 //getImage() from imagick to image.RGBA
-func (cl *cell) getImage(width, height int) (img *image.RGBA) {
-	mw := cl.img.GetImage()
+func (cl *Cell) getImage(width, height int) (img *image.RGBA) {
+	mw := cl.image.img.GetImage()
 	if (width == 0) || (height == 0) {
 		width = int(mw.GetImageWidth())
 		height = int(mw.GetImageHeight())
@@ -91,7 +91,7 @@ func (cl *cell) getImage(width, height int) (img *image.RGBA) {
 }
 
 // adding text to image copied from example
-func (cl *cell) imgtext(width, height int) *imagick.MagickWand {
+func (cl *Cell) imgtext(width, height int) *imagick.MagickWand {
 	mw := imagick.NewMagickWand()
 	//defer mw.Destroy()
 	dw := imagick.NewDrawingWand()
@@ -104,30 +104,30 @@ func (cl *cell) imgtext(width, height int) *imagick.MagickWand {
 	mw.NewImage(uint(width), uint(height), pw)
 
 	// Set up a 72 point white font
-	r, g, b, _ := cl.font.color.RGBA()
+	r, g, b, _ := cl.Font.color.RGBA()
 	pw.SetColor(fmt.Sprintf("rgb(%d,%d,%d)", r, g, b))
 	dw.SetFillColor(pw)
-	if (cl.font.name != "") || (cl.font.name != "none") {
-		dw.SetFont(cl.font.name)
+	if (cl.Font.name != "") || (cl.Font.name != "none") {
+		dw.SetFont(cl.Font.name)
 	}
-	dw.SetFontSize(cl.font.size)
+	dw.SetFontSize(cl.Font.size)
 
 	otlne := "none"
 	// Add a black outline to the text
-	r, g, b, _ = cl.font.outlineColor.RGBA()
-	if cl.font.outline {
+	r, g, b, _ = cl.Font.outlineColor.RGBA()
+	if cl.Font.outline {
 		otlne = fmt.Sprintf("rgb(%d,%d,%d)", r, g, b)
 	}
 
 	pw.SetColor(otlne)
 	dw.SetStrokeColor(pw)
-	dw.SetStrokeWidth(cl.font.outlineSize)
+	dw.SetStrokeWidth(cl.Font.outlineSize)
 
 	// Turn antialias on - not sure this makes a difference
 	//dw.SetTextAntialias(true)
 
 	// Now draw the text
-	dw.Annotation(cl.font.x, cl.font.y, cl.text)
+	dw.Annotation(cl.Font.x, cl.Font.y, cl.text)
 
 	// Draw the image on to the mw
 	mw.DrawImage(dw)
@@ -151,7 +151,7 @@ func (cl *cell) imgtext(width, height int) *imagick.MagickWand {
 	return mw
 }
 
-func findfonts() {
+func findFonts() {
 	cmd := exec.Command("grep", "-ivE", `\-Oblique$|-Bold$|-Italic$|-Light$`)
 	cmd.Stdin = strings.NewReader(strings.Join(imagick.QueryFonts("*"), "\n"))
 	var out bytes.Buffer
@@ -160,8 +160,7 @@ func findfonts() {
 	if err != nil {
 		log.Print(err)
 	}
-	QML.FontList = strings.Split(out.String(), "\n")
-	QML.FontLen = len(QML.FontList)
+	QML.FontList = out.String()
 }
 
 func round(a float64) int {

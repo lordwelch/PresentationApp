@@ -9,45 +9,50 @@ import (
 	"os"
 
 	"github.com/go-gl/glfw/v3.1/glfw"
-	"github.com/lordwelch/qml"
+	"github.com/limetext/qml-go"
+
 	"gopkg.in/gographics/imagick.v2/imagick"
 )
 
-//Bool type i'm lazy wanted a toggle function
-type Bool bool
+type Cell struct {
+	Font                   Font
+	image                  Image
+	index, collectionIndex int
+	qmlObject              qml.Object
+	text                   string
+	textVisible            bool
+}
+
+type collection []*Cell
+
+type Font struct {
+	color                   color.RGBA
+	name                    string
+	outline                 bool
+	outlineColor            color.RGBA
+	outlineSize, size, x, y float64
+}
+
+type Image struct {
+	img       *imagick.MagickWand
+	imgSource string
+	qmlImage  qml.Object
+}
 
 type qmlVar struct {
-	FontList   []string
-	FontLen    int
-	Verses     []string
-	VerseLen   int
-	VerseOrder []string
-	OrderLen   int
-	Img        []string
-	ImgLen     int
+	FontList   string
+	Verses     string
+	VerseOrder string
+	//Img        string
 }
 
-type cell struct {
-	text    string
-	img     *imagick.MagickWand
-	qmlimg  qml.Object
-	qmlcell qml.Object
-	index   int
-	font    struct {
-		name                    string
-		outlineSize, size, x, y float64
-		color                   color.RGBA
-		outlineColor            color.RGBA
-		outline                 Bool
-	}
-}
-
-type slide []*cell
+type service []collection
 
 var (
-	path   string
-	slides slide
-	err    error
+	currentService = new(service)
+	err            error
+	path           string
+	slides         collection
 )
 
 func main() {
@@ -56,157 +61,176 @@ func main() {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
-	win.Destroy()
-	glfw.PollEvents()
 	glfw.Terminate()
 
 }
 
 func run() error {
-	imagick.Initialize()
-
 	engine = qml.NewEngine()
 	QML = &qmlVar{}
-	engine.Context().SetVar("go", QML)
-	findfonts()
-	engine.AddImageProvider("images", imgProvider)
 	path = "qrc:///qml"
+	imagick.Initialize()
+	findFonts()
 
-	mainQml, err = engine.LoadFile(path + "/main.qml")
+	engine.Context().SetVar("go", QML)
+	engine.AddImageProvider("images", imgProvider)
+
+	err = qmlWindows()
 	if err != nil {
 		return err
 	}
 
-	edtQml, err = engine.LoadFile(path + "/qml/songEdit.qml")
-	if err != nil {
-		return err
-	}
+	currentService.Init(1)
 
-	cellQml, err = engine.LoadFile(path + "/qml/cell.qml")
-	if err != nil {
-		return err
-	}
-
-	qimg, err = engine.LoadFile(path + "/qml/img.qml")
-	if err != nil {
-		return err
-	}
-
-	qlst, err := engine.LoadFile(path + "/lst/tst.qml")
-	if err != nil {
-		return err
-	}
-
-	qlstEle, err := engine.LoadFile(path + "/lst/lstEle.qml")
-	if err != nil {
-		return err
-	}
-
-	window = mainQml.CreateWindow(engine.Context())
-	window2 = edtQml.CreateWindow(engine.Context())
-
-	textEdit = window.ObjectByName("textEdit")
 	//signals for whole qml
 	setSignals()
-	slides.add()
-
-	//var from GO to qml
 
 	//image is ready for imageprovider
 	imgready = true
-	tstlst :=qlst.Create(engine.Context())
-	tstlst.Set("parent", window.ObjectByName("data1"))
-	tstLlst := qlstEle.Create(engine.Context())
-	tstLlst.Call("get1")
-	//fmt.Println(tstLlst.Property("id1"))
-	tstlst.Call("addLst")  //.Call("get1")  //).(qml.Object).Create(engine.Context()).Set("parent", qlst.ObjectByName("nestedModel"))
-	window.Show()
-	window2.Show()
-	edtQmlShow()
-	slides[0].clearcache()
-	qml.RunMain(glInit)
 
-	window.Wait()
+	displayImg = DisplayWindow.Root().ObjectByName("displayImage")
+	serviceObject = serviceQml.Create(engine.Context())
+	serviceObject.Set("parent", MainWindow.ObjectByName("data1"))
+	serviceObject.Call("addLst", "shit")
+
+	//edtQmlShow()
+	qml.RunMain(glInit)
+	MainWindow.Wait()
+	slides.destroy()
+	fmt.Println(len(*currentService))
 
 	imagick.Terminate()
 	return nil
 }
 
-//Adds a new cell
-func (sl *slide) add( /*cl *cell*/ ) {
-	var cl cell
-	cl.Init()
-	//gets the length so that the index is valid
-	cl.index = len(*sl)
+func (sv *service) Init(num int) {
+	if num <= 0 {
+		num = 1
+	}
 
-	//increase count on parent QML element
-	window.ObjectByName("gridRect").Set("count", window.ObjectByName("gridRect").Int("count")+1)
-	cl.qmlcell = cellQml.Create(engine.Context())
-	cl.qmlcell.Set("objectName", fmt.Sprintf("cellRect%d", len(*sl)))
-	cl.qmlcell.Set("parent", window.ObjectByName("data1"))
-	cl.qmlcell.Set("index", cl.index)
+	for index := 0; index < num; index++ {
+		if sv == nil {
+			sv.add("")
+		}
+	}
+}
+
+func (sv *service) add(name string) {
+	var (
+		sl collection
+		i  = len(*sv)
+	)
+
+	if len(name) <= 0 {
+		name = "Song: " + fmt.Sprint(i)
+	}
+
+	sl.init(1)
+	*sv = append(*sv, sl)
+	//serviceObject.Call("addLst", name)
+}
+
+func (sv *service) remove(i int) {
+	(*sv)[i].destroy()
+
+	copy((*sv)[i:], (*sv)[i+1:])
+	(*sv)[len(*sv)-1] = nil // or the zero value of T
+	*sv = (*sv)[:len(*sv)-1]
+
+}
+
+func (sv *service) destroy() {
+	for i := len(*sv); i > 0; i-- {
+		sv.remove(i - 1)
+	}
+}
+
+func (sl *collection) init(num int) {
+	if num <= 0 {
+		num = 1
+	}
+
+	for index := 0; index < num; index++ {
+		if sl == nil {
+			sl.add("")
+		}
+	}
+}
+
+//Adds a new cell
+func (sl *collection) add(text string) {
+	var (
+		cl Cell
+		i  = len(*sl)
+	)
+
+	if len(text) <= 0 {
+		text = "Slide" + fmt.Sprint(i)
+	}
+
+	cl.Init()
 
 	//keep the pointer/dereference (i'm not sure which it is)
 	//problems occur otherwise
+	// now Im not an idiot and I know what this does
 	*sl = append(*sl, &cl)
 
 	//seperate image object in QML
-	cl.qmlimg.Set("objectName", fmt.Sprintf("cellImg%d", cl.index))
-	cl.qmlimg.Set("source", fmt.Sprintf("image://images/%d"+`;`+"0", cl.index))
-	cl.qmlimg.Set("parent", window.ObjectByName("data2"))
-	cl.qmlimg.Set("index", cl.index)
+	cl.image.qmlImage.Set("source", fmt.Sprintf("image://images/cell;%d", cl.index))
 	cl.setSignal()
 	//give QML the text
-	cl.qmlcell.ObjectByName("cellText").Set("text", cl.text)
-
-}
-
-func (cl *cell) Init() {
-	cl.text = "hello this is text\nhaha\nhdsjfklfhaskjd"
-	cl.index = -1
-	cl.font.color, cl.font.outlineColor = color.RGBA{0, 0, 0, 1}, color.RGBA{1, 1, 1, 1}
-	cl.font.name = "none"
-	cl.font.outline = false
-	cl.font.outlineSize = 1
-	cl.font.size = 35
-	cl.font.x, cl.font.y = 10, 30
-
-	cl.qmlcell = cellQml.Create(engine.Context())
-	cl.qmlimg = qimg.Create(engine.Context())
-
-	//load image
-	cl.img = imagick.NewMagickWand()
-	cl.img.ReadImage("logo:")
-
-}
-
-//(cell) remove() should destroy everything for this cell
-func (cl *cell) remove() {
-	cl.text = ""
-	cl.qmlimg.Destroy()
-	cl.qmlcell.Destroy()
-	cl.img.Destroy()
-	window.ObjectByName("gridRect").Set("count", window.ObjectByName("gridRect").Int("count")-1)
-	slides.remove(cl.index)
-	cl.index = -1
 
 }
 
 //(slide) remove copied from github.com/golang/go/wiki/SliceTricks
-func (sl *slide) remove(i int) {
-	*sl, (*sl)[len((*sl))-1] = append((*sl)[:i], (*sl)[i+1:]...), nil
+func (sl *collection) remove(i int) {
+	cl := (*sl)[i]
+	cl.text = ""
+	cl.image.qmlImage.Destroy()
+	cl.qmlObject.Destroy()
+	cl.image.img.Destroy()
+	MainWindow.ObjectByName("gridRect").Set("count", MainWindow.ObjectByName("gridRect").Int("count")-1)
+	cl.index = -1
+
+	copy((*sl)[i:], (*sl)[i+1:])
+	(*sl)[len(*sl)-1] = nil // or the zero value of T
+	(*sl) = (*sl)[:len(*sl)-1]
+
+	//*sl, (*sl)[len((*sl))-1] = append((*sl)[:i], (*sl)[i+1:]...), nil
 }
 
-//Toggle, lazy wanted a func for it
-func (bl *Bool) Toggle() {
-	if *bl == false {
-		*bl = true
-	} else {
-		*bl = false
+func (sl *collection) destroy() {
+	for i := len(*sl); i > 0; i-- {
+		sl.remove(i - 1)
 	}
 }
 
+func (cl *Cell) Init() {
+	cl.text = `hello this is text`
+	cl.index = -1
+	cl.Font.color, cl.Font.outlineColor = color.RGBA{0, 0, 0, 1}, color.RGBA{1, 1, 1, 1}
+	cl.Font.name = "none"
+	cl.Font.outline = false
+	cl.Font.outlineSize = 1
+	cl.Font.size = 35
+	cl.Font.x, cl.Font.y = 10, 30
+
+	cl.qmlObject = cellQml.Create(engine.Context())
+	cl.image.qmlImage = cl.qmlObject.ObjectByName("cellImg")
+
+	//load image
+	cl.image.img = imagick.NewMagickWand()
+	cl.image.img.ReadImage("logo:")
+
+}
+
+func (cl *Cell) Select() {
+	selectedCell = cl.index
+	cl.qmlObject.ObjectByName("cellMouse").Call("selected")
+
+}
+
 //not really needed
-func (cl cell) String() string {
+func (cl Cell) String() string {
 	return fmt.Sprintf("Index: %d \nText:  %s\n", cl.index, cl.text)
 }
