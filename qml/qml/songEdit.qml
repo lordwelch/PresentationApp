@@ -11,14 +11,18 @@ ApplicationWindow {
     ColorDialog {
         id: textClrDialog
         //objectname: "textClrDialog"
+        // @disable-check M16
         title: "Please choose a color for the text"
+        // @disable-check M16
         showAlphaChannel: true
     }
 
     ColorDialog {
         id: outlineClrDialog
         //objectname: "outlineClrDialog"
+        // @disable-check M16
         title: "Please choose a color for the text"
+        // @disable-check M16
         showAlphaChannel: true
     }
 
@@ -179,9 +183,9 @@ ApplicationWindow {
                     id: fontPicker
                     objectName: "fontPicker"
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                    model: go.fontList.split("\n")
-                    /*// @disable-check M16
-                    delegate:Text {
+                    model: go.fontLen
+                    // @disable-check M16
+                    /*delegate:Text {
                         text: go.fontList(index)
                     }*/
 
@@ -218,9 +222,9 @@ ApplicationWindow {
                 ComboBox {
                     id: versePicker
                     objectName: "versePicker"
-                    model: go.verses.split("\n")
-                    /*// @disable-check M16
-                    delegate: Text {
+                    model: go.verseLen
+                    // @disable-check M16
+                   /* delegate: Text {
                         text: go.verses(index)
                     }*/
                 }
@@ -228,9 +232,9 @@ ApplicationWindow {
                 ComboBox {
                     id: imgPicker
                     objectName: "imgPicker"
-                    model: go.img.split("\n")
-                    /*// @disable-check M16
-                    delegate: Text {
+                    model: go.imgLen
+                    // @disable-check M16
+                    /*delegate: Text {
                         text: go.img(index)
                     }*/
                 }

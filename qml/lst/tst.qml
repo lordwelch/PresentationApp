@@ -1,91 +1,30 @@
 //https://gist.github.com/elpuri/3753756
 import QtQuick 2.4
-import QtQuick.Controls 1.3
 
 Item {
-    id: rt
-    property ListElement def: ListElement {
-        property string cellText: "Hello\nMy\nName\nIs\n\"Timmy\""
-        property int collectionIndex: 0
-        property string imageSource: "image://images/list:;cell:"
-    }
-
-    Component.onCompleted: addLst("Haha :-P")
-    height: ((lst.count) * 50) + (lst.subCount * 100)
-
+    id: tst4
+    height: 50 + ((tst3.count - 1) * 50) + (tst3.subCount * 40)
+    width: 200
     anchors.right: parent.right
+    anchors.rightMargin: 0
     anchors.left: parent.left
-
-    function remove(List, index) {
-        lst.subCount--
-        nestedModel.get(List).subItems.remove(index, 1)
+    anchors.leftMargin: 0
+    Component.onCompleted: {
+     addLst()
     }
 
-    function pop(List) {
-        lst.subCount--
-        nestedModel.get(List).subItems.remove(nestedModel.get( List).subItems.count - 1, 1)
+    function addLst() {
+        var tstm
+	tstm = nestedModel.get(0)
+	tstm.subItems = [ { itemName: "test" }, { itemName: "notest" } ]
+
+        nestedModel.append(tstm)
+
     }
 
-    function newdef(index, txt, src) {
-        var item = Object.create(def)
-
-        item.collectionIndex = index
-        item.text = txt
-        item.imageSource = src
-        return item
-    }
-
-    function remLst() {
-        nestedModel.remove(nestedModel.count - 1, 1)
-    }
-
-    function apppend(List, obj) {
-        lst.subCount++
-        nestedModel.get(List).subItems.append(obj)
-    }
-
-    function insert(List, index, obj) {
-        lst.subCount++
-        nestedModel.get(List).subItems.insert(index, obj)
-    }
-
-    function get(List, index) {
-        return nestedModel.get(List).subItems.get(index)
-    }
-
-    function set(List, index, obj) {
-        nestedModel.get(List).subItems.set(index, obj)
-    }
-
-    function addLst(str) {
-        var newCollection
-        var i = 0
-        var temp = Qt.createComponent("Sublist.qml").createObject(rt, {})
-
-        newCollection = temp.get(0)
-        newCollection.name = str
-        newCollection.subItems.clear()
-        for (i = 0; i < 1; i++) {
-            newCollection.subItems.append(newdef(nestedModel.count, "idiot"))
-        }
-
-        nestedModel.append(newCollection)
-    }
-
-    //    Button {
-    //        id: btn
-    //        width: 100
-    //        text: "add"
-    //        onClicked: {
-    //            addLst()
-    //        }
-    //    }
     ListView {
-        id: lst
+        id: tst3
         anchors.fill: parent
-        y: 0
-        height: ((lst.count) * 55) + (lst.subCount * 100)
-        interactive: false
         property int subCount: 0
         model: nestedModel
         delegate: Component {
@@ -109,19 +48,13 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         x: 15
                         font.pixelSize: 24
-                        text: name
-                        clip: true
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.rightMargin: 15
-                        anchors.leftMargin: 5
+                        text: categoryName
                     }
 
                     Rectangle {
                         color: "red"
                         width: 30
                         height: 30
-
                         anchors.right: parent.right
                         anchors.rightMargin: 15
                         anchors.verticalCenter: parent.verticalCenter
@@ -133,9 +66,9 @@ Item {
                             onClicked: {
                                 nestedModel.setProperty(index, "collapsed", !collapsed)
                                 if (!nestedModel.get(index).collapsed) {
-                                    lst.subCount = lst.subCount + subItemLoader.subItemModel.count
+                                    tst3.subCount = tst3.subCount + subItemLoader.subItemModel.count
                                 } else {
-                                    lst.subCount = lst.subCount - subItemLoader.subItemModel.count
+                                    tst3.subCount = tst3.subCount - subItemLoader.subItemModel.count
                                 }
                             }
                         }
@@ -149,12 +82,10 @@ Item {
                     // the Loader element retains the same height it had when sourceComponent was set. Setting visible
                     // to false makes the parent Column treat it as if it's height was 0.
                     visible: !collapsed
-
                     property variant subItemModel: subItems
                     sourceComponent: subItemColumnDelegate
-                    onStatusChanged: if (status == Loader.Ready) {
+                    onStatusChanged: if (status == Loader.Ready)
                                          item.model = subItemModel
-                                     }
                 }
             }
         }
@@ -162,20 +93,88 @@ Item {
 
     Component {
         id: subItemColumnDelegate
-
         Column {
             property alias model: subItemRepeater.model
-            width: rt.width
 
+            width: tst4.width
             Repeater {
                 id: subItemRepeater
-                objectName: "repeater"
-                delegate: Cell {}
+                delegate: Rectangle {
+                    color: "#cccccc"
+                    height: 40
+                    anchors.right: parent.right
+                    anchors.left: parent.left
+                    //width: 200
+                    border.color: "black"
+                    border.width: 2
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        x: 30
+                        font.pixelSize: 18
+                        text: itemName
+                    }
+                }
             }
         }
     }
     ListModel {
         id: nestedModel
         objectName: "nestedModel"
+        ListElement {
+            categoryName: "Cars"
+            collapsed: true
+            subItems: [
+                ListElement {
+                    itemName: "Nisan"
+                },
+                ListElement {
+                    itemName: "Toyota"
+                },
+                ListElement {
+                    itemName: "Chevy"
+                },
+                ListElement {
+                    itemName: "Audi"
+                }
+            ]
+        }
+        ListElement {
+            categoryName: "Cars"
+            collapsed: true
+            subItems: [
+                ListElement {
+                    itemName: "Nissa"
+                },
+                ListElement {
+                    itemName: "Toyota"
+                },
+                ListElement {
+                    itemName: "Chevy"
+                },
+                ListElement {
+                    itemName: "Audi"
+                }
+            ]
+        }
+        ListElement {
+            categoryName: "Cars"
+            collapsed: true
+            subItems: [
+                ListElement {
+                    itemName: "Nissan"
+                },
+                ListElement {
+                    itemName: "Toota"
+                },
+                ListElement {
+                    itemName: "Chevy"
+                },
+                ListElement {
+                    itemName: "Audi"
+                }
+            ]
+        }
     }
 }
+
