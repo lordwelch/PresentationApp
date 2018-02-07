@@ -104,8 +104,8 @@ func run() error {
 	return nil
 }
 
-func (sv service) Init(uint num) {
-	if num == 0 {
+func (sv service) Init(int num) {
+	if num <= 0 {
 		num = 1
 	}
 
@@ -230,6 +230,16 @@ func (cl *Cell) Select() {
 	cl.qmlObject.ObjectByName("cellMouse").Call("selected")
 
 }
+
+/*func (cl *Cell) Texture() glbase.Texture {
+	fmt.Println("index: ", cl.index, "  ", cl.img.tex)
+	fmt.Println("error tex:", gl.GetError())
+	if cl.img.tex == 0 {
+		cl.img.tex = newTexture(*cl.getImage(monWidth, monHeight))
+		fmt.Println("new texture", cl.img.tex)
+	}
+	return cl.img.tex
+}*/
 
 //not really needed
 func (cl Cell) String() string {
