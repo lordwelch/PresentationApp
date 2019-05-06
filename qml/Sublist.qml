@@ -8,7 +8,7 @@ ListModel {
         return get(0)
     }
     ListElement {
-        categoryName: "Cars"
+        title: "Cars"
         collapsed: true
         subItems: [
             ListElement {

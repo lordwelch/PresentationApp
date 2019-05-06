@@ -1,8 +1,7 @@
 import QtQuick 2.4
-import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
-import QtQuick.Dialogs 1.2
-//import Qt.labs.controls 1.0
+import QtQuick.Controls 1.6
+import QtQuick.Layouts 1.11
+import QtQuick.Dialogs 1.3
 
 ApplicationWindow {
     minimumHeight: 480
@@ -79,7 +78,7 @@ ApplicationWindow {
                 }
                 ListView {
                     id: lstVerses
-		    objectName: "lstVerses"
+                    objectName: "lstVerses"
                     clip: true
                     highlight: Rectangle {
                         color: "lightsteelblue"
@@ -119,7 +118,7 @@ ApplicationWindow {
                 }
                 ListView {
                     id: lstOrder
-		    objectName: "lstOrder"
+                    objectName: "lstOrder"
                     clip: true
                     highlight: Rectangle {
                         color: "lightsteelblue"
@@ -180,11 +179,6 @@ ApplicationWindow {
                     objectName: "fontPicker"
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                     model: go.fontList.split("\n")
-                    /*// @disable-check M16
-                    delegate:Text {
-                        text: go.fontList(index)
-                    }*/
-
                 }
 
                 SpinBox {
@@ -228,7 +222,7 @@ ApplicationWindow {
                 ComboBox {
                     id: imgPicker
                     objectName: "imgPicker"
-                    model: go.img.split("\n")
+                    //model: go.img.split("\n")
                     /*// @disable-check M16
                     delegate: Text {
                         text: go.img(index)
@@ -236,7 +230,7 @@ ApplicationWindow {
                 }
                 TextArea {
                     id: txtVerse
-		    objectName: "txtVerse"
+                    objectName: "txtVerse"
                     width: 80
                     height: 20
                     text: qsTr("Text Edit")

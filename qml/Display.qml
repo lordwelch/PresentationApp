@@ -1,5 +1,5 @@
 import QtQuick 2.4
-import QtQuick.Controls 1.3
+import QtQuick.Controls 2.4
 
 ApplicationWindow {
     flags: Qt.MaximumSize
@@ -13,5 +13,9 @@ ApplicationWindow {
         antialiasing: true
         anchors.fill: parent
     }
-
 }
+
+/*##^## Designer {
+    D{i:0;autoSize:true;height:480;width:640}
+}
+ ##^##*/

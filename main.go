@@ -5,45 +5,46 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	"os"
 
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/limetext/qml-go"
-
-	"gopkg.in/gographics/imagick.v2/imagick"
 )
 
 type Cell struct {
 	Font                   Font
 	image                  Image
 	index, collectionIndex int
-	qmlObject              qml.Object
 	text                   string
 	textVisible            bool
 }
 
-type collection []*Cell
+type collection struct {
+	collection []*Cell
+	title      string
+}
 
 type Font struct {
 	color                   color.RGBA
 	name                    string
+	path                    string
 	outline                 bool
 	outlineColor            color.RGBA
 	outlineSize, size, x, y float64
 }
 
 type Image struct {
-	img       *imagick.MagickWand
-	imgSource string
-	qmlImage  qml.Object
+	path     string
+	original image.Image
+	resized  image.Image
 }
 
 type qmlVar struct {
 	FontList   string
 	Verses     string
 	VerseOrder string
-	//Img        string
 }
 
 type service []collection
@@ -56,7 +57,6 @@ var (
 )
 
 func main() {
-
 	if err = qml.Run(run); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
@@ -69,7 +69,6 @@ func run() error {
 	engine = qml.NewEngine()
 	QML = &qmlVar{}
 	path = "qrc:///qml"
-	imagick.Initialize()
 	findFonts()
 
 	engine.Context().SetVar("go", QML)
@@ -82,16 +81,13 @@ func run() error {
 
 	currentService.Init(1)
 
-	//signals for whole qml
-	setSignals()
-
 	//image is ready for imageprovider
 	imgready = true
 
 	displayImg = DisplayWindow.Root().ObjectByName("displayImage")
 	serviceObject = serviceQml.Create(engine.Context())
-	serviceObject.Set("parent", MainWindow.ObjectByName("data1"))
-	serviceObject.Call("addLst", "shit")
+	serviceObject.Set("parent", MainWindow.ObjectByName("scview"))
+	serviceObject.Call("addLst", "not")
 
 	//edtQmlShow()
 	qml.RunMain(glInit)
@@ -99,7 +95,6 @@ func run() error {
 	slides.destroy()
 	fmt.Println(len(*currentService))
 
-	imagick.Terminate()
 	return nil
 }
 
@@ -174,21 +169,12 @@ func (sl *collection) add(text string) {
 	//problems occur otherwise
 	// now Im not an idiot and I know what this does
 	*sl = append(*sl, &cl)
-
-	//seperate image object in QML
-	cl.image.qmlImage.Set("source", fmt.Sprintf("image://images/cell;%d", cl.index))
-	cl.setSignal()
-	//give QML the text
-
 }
 
-//(slide) remove copied from github.com/golang/go/wiki/SliceTricks
+// remove copied from github.com/golang/go/wiki/SliceTricks
 func (sl *collection) remove(i int) {
 	cl := (*sl)[i]
 	cl.text = ""
-	cl.image.qmlImage.Destroy()
-	cl.qmlObject.Destroy()
-	cl.image.img.Destroy()
 	MainWindow.ObjectByName("gridRect").Set("count", MainWindow.ObjectByName("gridRect").Int("count")-1)
 	cl.index = -1
 
@@ -214,20 +200,6 @@ func (cl *Cell) Init() {
 	cl.Font.outlineSize = 1
 	cl.Font.size = 35
 	cl.Font.x, cl.Font.y = 10, 30
-
-	cl.qmlObject = cellQml.Create(engine.Context())
-	cl.image.qmlImage = cl.qmlObject.ObjectByName("cellImg")
-
-	//load image
-	cl.image.img = imagick.NewMagickWand()
-	cl.image.img.ReadImage("logo:")
-
-}
-
-func (cl *Cell) Select() {
-	selectedCell = cl.index
-	cl.qmlObject.ObjectByName("cellMouse").Call("selected")
-
 }
 
 //not really needed
